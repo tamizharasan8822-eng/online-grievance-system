@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Support - Hardware & Software Grievance Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f3f4f6; }
+        .header { background-color: #1e293b; color: white; padding: 25px; text-align: center; border-bottom: 5px solid #3b82f6; }
+        .header h1 { margin: 0; font-size: 26px; }
+        .container { max-width: 850px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .section-title { color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; margin-top: 30px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; color: #4b5563; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: #2563eb; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
+        button:hover { background-color: #1d4ed8; }
+        .btn-track { background-color: #0f172a; margin-top: 10px; }
+        .alert { padding: 15px; margin-top: 20px; border-radius: 5px; display: none; }
+        .alert-success { background-color: #dcfce7; color: #14532d; }
+        .alert-info { background-color: #e0f2fe; color: #0369a1; }
+        .alert-danger { background-color: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>IT HELP DESK & SUPPORT PORTAL</h1>
+        <p>Hardware & Software Grievance Management System</p>
+    </div>
+    <div class="container">
+        <h2 class="section-title">💻 Register IT Issue (புதிய புகார் பதிவு செய்தல்)</h2>
+        <div class="form-group">
+            <label>Employee Name / ID:</label>
+            <input type="text" id="userName" placeholder="e.g., Tamilarasan">
+        </div>
+        <div class="form-group">
+            <label>Select Faulty Component:</label>
+            <select id="hardwareComponent">
+                <option value="Mouse">Mouse Not Working</option>
+                <option value="Keyboard">Keyboard Not Working</option>
+                <option value="Monitor">Monitor Problem / No Display</option>
+                <option value="Motherboard">Motherboard Issue</option>
+                <option value="RAM">RAM Problem</option>
+                <option value="SMPS">SMPS Problem / Power Issue</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Grievance Description:</label>
+            <textarea id="complaintDetails" rows="4" placeholder="Describe the problem..."></textarea>
+        </div>
+        <div class="form-group">
+            <label>Upload Proof/Photo:</label>
+            <input type="file" id="complaintPhoto" accept="image/*">
+        </div>
+        <button onclick="submitGrievance()">Submit Ticket to IT Team</button>
+        <div id="regResult" class="alert alert-success"></div>
+
+        <h2 class="section-title">🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
+        <div class="form-group">
+            <label>Enter Complaint Reference Number:</label>
+            <input type="text" id="trackId" placeholder="e.g., REG123456">
+        </div>
+        <button class="btn-track" onclick="trackGrievance()">Check Status</button>
+        <div id="trackResult" class="alert"></div>
+    </div>
+
+    <script>
+       const API_BASE_URL = 'https://unpopular-tannery-glider.ngrok-free.dev/api';
+
+        function submitGrievance() {
+            const name = document.getElementById('userName').value;
+            const component = document.getElementById('hardwareComponent').value;
+            const details = document.getElementById('complaintDetails').value;
+            const photoFile = document.getElementById('complaintPhoto').files[0];
+            const regResult = document.getElementById('regResult');
+
+            if(!name || !details) {
+                alert('Please fill all required fields!');
+                return;
+            }
+
+            // போட்டோ மற்றும் டேட்டாவை சர்வருக்கு அனுப்ப FormData பயன்படுத்த வேண்டும்
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('details', `[${component}] ${details}`);
+            if(photoFile) {
+                formData.append('photo', photoFile);
+            }
+
+            fetch(`${API_BASE_URL}/complaint`, {
+                method: 'POST',
+                body: formData // Headers தேவையில்லை, FormData தானாக எடுத்துக்கொள்ளும்
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    regResult.style.display = 'block';
+                    regResult.innerHTML = `<strong>✔ Ticket Raised!</strong><br>ID: <span style="color:blue; font-size:18px">${data.id}</span>`;
+                    document.getElementById('userName').value = '';
+                    document.getElementById('complaintDetails').value = '';
+                    document.getElementById('complaintPhoto').value = '';
+                }
+            })
+            .catch(err => { alert('Error connecting to server!'); });
+        }
+
+        function trackGrievance() {
+            const id = document.getElementById('trackId').value;
+            const trackResult = document.getElementById('trackResult');
+
+            fetch(`${API_BASE_URL}/complaint/${id}`)
+            .then(res => res.json())
+            .then(response => {
+                trackResult.style.display = 'block';
+                if(response.found) {
+                    trackResult.className = 'alert alert-info';
+                    trackResult.innerHTML = `<b>Name:</b> ${response.data.name}<br><b>Issue:</b> ${response.data.details}<br><b>Status:</b> ${response.data.status}`;
+                } else {
+                    trackResult.className = 'alert alert-danger';
+                    trackResult.innerText = '🚫 Ticket not found!';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

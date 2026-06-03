@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Grievances</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header-section { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-bottom: 20px; }
+        h2 { color: #2c3e50; margin: 0; }
+        .btn-pdf { background-color: #e74c3c; color: white; border: none; padding: 10px 20px; font-size: 14px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .btn-pdf:hover { background-color: #c0392b; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #3498db; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+        select { padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; background-color: #fff; cursor: pointer; font-weight: bold; }
+        
+        /* PDF பிரிண்டிங்கிற்கான பிரத்யேக வடிவமைப்பு */
+        .pdf-group-title { background-color: #2c3e50; color: white; padding: 8px 12px; font-weight: bold; margin-top: 25px; border-radius: 4px; }
+        .pdf-table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
+        .pdf-table th, .pdf-table td { border: 1px solid #bdc3c7; padding: 10px; text-align: left; font-size: 12px; }
+        .pdf-table th { background-color: #f2f2f2; color: #333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <h2>அட்மின் பேனல் - புகார்கள் (Grievance Dashboard)</h2>
+        <button class="btn-pdf" onclick="downloadPDFReport()">📄 Download PDF Report</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>பெயர் (Name)</th>
+                <th>மின்னஞ்சல் (Email)</th>
+                <th>புகார் விவரம் (Complaint)</th>
+                <th>தேதி (Date)</th>
+                <th>நிலை (Status)</th>
+            </tr>
+        </thead>
+        <tbody id="complaints-table">
+            </tbody>
+    </table>
+</div>
+
+<div id="pdf-template" style="display: none; padding: 30px; background: white; color: #000;">
+    <h2 style="text-align: center; color: #2c3e50; margin-bottom: 5px;">Grievance Redressal System</h2>
+    <p style="text-align: center; margin: 0 0 20px 0; font-size: 14px; color: #7f8c8d;">Complaints Report (Month & Year Wise)</p>
+    <div id="pdf-content"></div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        loadComplaints();
+    });
+
+    // புகார்களை டேட்டாபேஸில் இருந்து எடுத்து காட்டும் ஃபங்க்ஷன்
+    function loadComplaints() {
+        fetch('/api/admin/complaints')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('complaints-table');
+                tableBody.innerHTML = ''; 
+
+                if (data.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">புகார்கள் எதுவும் இல்லை!</td></tr>`;
+                    return;
+                }
+
+                data.forEach(complaint => {
+                    const row = document.createElement('tr');
+                    
+                    const statusOptions = ['Pending', 'Processing', 'Closed'].map(opt => 
+                        `<option value="${opt}" ${complaint.status === opt ? 'selected' : ''}>${opt}</option>`
+                    ).join('');
+
+                    row.innerHTML = `
+                        <td>${complaint.id || 'N/A'}</td>
+                        <td>${complaint.name || 'Anonymous'}</td>
+                        <td>${complaint.email || 'பதிவு செய்யப்படவில்லை'}</td>
+                        <td>${complaint.details || 'No details'}</td>
+                        <td>${complaint.created_at ? new Date(complaint.created_at).toLocaleDateString() : 'N/A'}</td>
+                        <td>
+                            <select onchange="updateStatus('${complaint.id}', this.value)">
+                                ${statusOptions}
+                            </select>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(err => console.error("Error fetching complaints:", err));
+    }
+
+    // ஸ்டேட்டஸை அப்டேட் செய்யும் ஃபங்க்ஷன்
+    function updateStatus(id, newStatus) {
+        fetch(`/api/admin/complaints/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`ID: ${id}-ன் நிலை [${newStatus}] ஆக மாற்றப்பட்டதுண்ணா!`);
+            } else {
+                alert("ஸ்டேட்டஸ் மாற்றுவதில் ஏதோ தவறு நடந்துள்ளது!");
+            }
+        })
+        .catch(err => console.error("Error updating status:", err));
+    }
+
+    // மாத மற்றும் வருட வாரியாக பிரிக்கப்பட்ட PDF-ஐ டவுன்லோட் செய்யும் ஃபங்க்ஷன்
+    function downloadPDFReport() {
+    window.print();
+}
+</script>
+
+</body>
+</html>
