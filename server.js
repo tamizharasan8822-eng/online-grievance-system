@@ -17,13 +17,14 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 💻 MySQL டேட்டாபேஸ் கனெக்ஷன்
 const db = mysql.createConnection({
-host: 'mysql-36052920-tamizharasan8822-28a1.h.aivencloud.com',    port: 22638,
-    user: 'avnadmin',
-    password:'AVNS_9f4t7VAzHlXMpQ4uSTn',
-    database: 'defaultdb',
-    ssl: {
-        rejectUnauthorized: false
-    }
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: 22638,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 db.connect((err) => {
