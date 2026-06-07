@@ -54,8 +54,7 @@ app.post('/api/complaint', upload.single('photo'), (req, res) => {
     const photoInfo = req.file ? ` [Photo: /uploads/${req.file.filename}]` : ''; 
     
     // புதிய கம்ப்ளைன்ட் ஐடி (REG + 6 எண்கள்)
-    const complaintId = 'REG' + Math.floor(100000 + Math.random() * 900000);
-
+   const complaintId = Math.floor(100000 + Math.random() * 900000);
     // விவரத்தையும் போட்டோ பெயரையும் ஒன்றாக இணைக்கிறோம்
     const finalDetails = details + photoInfo;
 
