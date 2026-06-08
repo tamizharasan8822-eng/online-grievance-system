@@ -85,8 +85,7 @@
             if(photoFile) {
                 formData.append('photo', photoFile);
             }
-
-         fetch(`${API_BASE_URL}/api/complaint`, {
+fetch(`${API_BASE_URL}/api/complaint`, {
         method: 'POST',
         body: formData
     });
@@ -102,26 +101,28 @@ function trackGrievance() {
     fetch(`/api/complaint/${trackId}`)
         .then(response => response.json())
         .then(data => {
-            .catch(err => { alert('Error connecting to server!'); });
-        }
-
-        function trackGrievance() {
-            const id = document.getElementById('trackId').value;
             const trackResult = document.getElementById('trackResult');
-
-            fetch(`${API_BASE_URL}/complaint/${id}`)
-            .then(res => res.json())
-            .then(response => {
-                trackResult.style.display = 'block';
-                if(response.found) {
-                    trackResult.className = 'alert alert-info';
-                    trackResult.innerHTML = `<b>Name:</b> ${response.data.name}<br><b>Issue:</b> ${response.data.details}<br><b>Status:</b> ${response.data.status}`;
-                } else {
-                    trackResult.className = 'alert alert-danger';
-                    trackResult.innerText = '🚫 Ticket not found!';
-                }
-            });
-        }
-    </script>
+            if (data.error) {
+                trackResult.className = "alert alert-danger";
+                trackResult.innerHTML = `❌ Error: ${data.error}`;
+            } else {
+                trackResult.className = "alert alert-success";
+                trackResult.innerHTML = `
+                    <strong>📋 Complaint Details:</strong><br>
+                    👤 Name: ${data.name}<br>
+                    🔧 Faulty Component: ${data.hardware_component || 'N/A'}<br>
+                    📝 Description: ${data.description}<br>
+                    📍 Ward: ${data.ward || 'N/A'}<br>
+                    ⚡ Status: <strong>${data.status}</strong>
+                `;
+            }
+            trackResult.style.display = 'block';
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error fetching ticket status');
+        });
+}
+</script>
 </body>
 </html>
