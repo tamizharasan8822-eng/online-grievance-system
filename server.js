@@ -58,9 +58,9 @@ app.post('/api/complaint', upload.single('photo'), (req, res) => {
     // விவரத்தையும் போட்டோ பெயரையும் ஒன்றாக இணைக்கிறோம்
     const finalDetails = details + photoInfo;
 
-const query = "INSERT INTO complaints (id, name, description, status, phone, address, ward) VALUES (?, ?, ?, ?, ?, ?, ?)";
+const query = "INSERT INTO complaints (id, name, description, status, phone, address, ward, complaint_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     
-  db.query(query, [complaintId, name, finalDetails, 'Pending', '0000000000', 'N/A', '1'], (err, result) => {
+ db.query(query, [complaintId, name, finalDetails, 'Pending', '0000000000', 'N/A', '1', 'General'], (err, result) => {
         if (err) {
             console.error("Database Error: ", err);
             return res.status(500).json({ error: err.message });
