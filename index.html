@@ -87,19 +87,21 @@
             }
 
          fetch(`${API_BASE_URL}/api/complaint`, {
-                method: 'POST',
-                body: formData // Headers தேவையில்லை, FormData தானாக எடுத்துக்கொள்ளும்
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    regResult.style.display = 'block';
-                    regResult.innerHTML = `<strong>✔ Ticket Raised!</strong><br>ID: <span style="color:blue; font-size:18px">${data.id}</span>`;
-                    document.getElementById('userName').value = '';
-                    document.getElementById('complaintDetails').value = '';
-                    document.getElementById('complaintPhoto').value = '';
-                }
-            })
+        method: 'POST',
+        body: formData
+    });
+}
+
+function trackGrievance() {
+    const trackId = document.getElementById('trackId').value;
+    if (!trackId) {
+        alert('Please enter a Complaint Reference Number');
+        return;
+    }
+
+    fetch(`/api/complaint/${trackId}`)
+        .then(response => response.json())
+        .then(data => {
             .catch(err => { alert('Error connecting to server!'); });
         }
 
