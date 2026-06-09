@@ -112,20 +112,23 @@ function trackGrievance() {
 
     fetch(`${API_BASE_URL}/api/complaint/${trackId}`)
         .then(response => response.json())
-        .then(data => {
+       .then(data => {
             const trackResult = document.getElementById('trackResult');
-            if (data.error) {
+            if (data.error || !data || data.length === 0) {
                 trackResult.className = "alert alert-danger";
-                trackResult.innerHTML = `❌ Error: ${data.error}`;
+                trackResult.innerHTML = `❌ Error: Ticket Not Found`;
             } else {
+                const ticket = data[0]; // டேட்டாபேஸ்ல இருந்து வர்ற முதல் ரோ-வை எடுக்கிறோம்!
                 trackResult.className = "alert alert-success";
                 trackResult.innerHTML = `
-                    <strong>📋 Complaint Details:</strong><br>
-                    👤 Name: ${data.name}<br>
-                    📝 Description: ${data.description}<br>
-                    ⚡ Status: <strong>${data.status}</strong>
+                    <strong>📝 Complaint Details:</strong><br>
+                    👤 Name: ${ticket.name}<br>
+                    📄 Description: ${ticket.description}<br>
+                    ⚡ Status: <strong>${ticket.status}</strong>
                 `;
             }
+            trackResult.style.display = 'block';
+        })
             trackResult.style.display = 'block';
         })
         .catch(err => {
