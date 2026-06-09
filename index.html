@@ -88,6 +88,22 @@
 fetch(`${API_BASE_URL}/api/complaint`, {
         method: 'POST',
         body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        const resultDiv = document.getElementById('result');
+        if (data.success) {
+            resultDiv.className = "alert alert-success";
+            resultDiv.innerHTML = `✓ Ticket Raised! ID: ${data.id}`;
+        } else {
+            resultDiv.className = "alert alert-danger";
+            resultDiv.innerHTML = `❌ Error: ${data.error}`;
+        }
+        resultDiv.style.display = 'block';
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error submitting complaint');
     });
 }
 
