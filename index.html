@@ -91,18 +91,52 @@ fetch(`${API_BASE_URL}/api/complaint`, {
     })
     .then(response => response.json())
     .then(data => {
-        const resultDiv = document.getElementById('result');
+        // 💡 அலர்ட் பாக்ஸ் மூலமா டிக்கெட் ஐடியை யூசருக்குக் காட்டிடலாம் அண்ணாச்சி!
         if (data.success) {
-            resultDiv.className = "alert alert-success";
-            resultDiv.innerHTML = `✓ Ticket Raised! ID: ${data.id}`;
+            alert(`✓ Ticket Raised Successfully!\nYour Complaint Reference Number is: ${data.id}`);
         } else {
-            resultDiv.className = "alert alert-danger";
-            resultDiv.innerHTML = `❌ Error: ${data.error}`;
+            alert(`❌ Error: ${data.error}`);
         }
-        resultDiv.style.display = 'block';
     })
     .catch(err => {
         console.error(err);
+        alert('Error submitting complaint');
+    });
+}
+
+function trackGrievance() {
+    const trackId = document.getElementById('trackId').value;
+    if (!trackId) {
+        alert('Please enter a Complaint Reference Number');
+        return;
+    }
+
+    fetch(`/api/complaint/${trackId}`)
+        .then(response => response.json())
+        .then(data => {
+            const trackResult = document.getElementById('trackResult');
+            if (data.error) {
+                trackResult.className = "alert alert-danger";
+                trackResult.innerHTML = `❌ Error: ${data.error}`;
+            } else {
+                trackResult.className = "alert alert-success";
+                trackResult.innerHTML = `
+                    <strong>📋 Complaint Details:</strong><br>
+                    👤 Name: ${data.name}<br>
+                    📝 Description: ${data.description}<br>
+                    ⚡ Status: <strong>${data.status}</strong>
+                `;
+            }
+            trackResult.style.display = 'block';
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error fetching ticket status');
+        });
+}
+</script>
+</body>
+</html>
         alert('Error submitting complaint');
     });
 }
