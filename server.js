@@ -69,20 +69,22 @@ const query = "INSERT INTO complaints (id, name, description, status, phone, add
 });
 
 // 2. 🔍 புகாரின் நிலையைத் தேடும் API
+// 2. 🔍 புகாரின் நிலையைத் தேடும் API
 app.get('/api/complaint/:id', (req, res) => {
-    const complaintId = req.params.id;
-    const query = "SELECT * FROM complaints WHERE id = ?";
-
-    db.query(query, [complaintId], (err, result) => {
+    const ticketId = req.params.id;
+    const query = "SELECT name, description, status FROM complaints WHERE id = ?";
+    
+    db.query(query, [ticketId], (err, result) => {
         if (err) {
-            return res.status(500).json({ error: err.message });
+            console.error("Database error:", err);
+            return res.status(500).json({ error: "Database error" });
         }
-        if (result.length > 0) {
-            res.json({ found: true, data: result[0] });
-        } else {
-            res.json({ found: false });
+        if (result.length === 0) {
+            return res.status(404).json({ error: "Ticket not found" });
         }
+        res.json(result); 
     });
+});
 });
 // அட்மின் பேனல் HTML ஃபைலை நேரடியாக ஓபன் செய்ய
 app.get('/admin.html', (req, res) => {
