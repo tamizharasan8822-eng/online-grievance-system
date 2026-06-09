@@ -70,9 +70,10 @@ const query = "INSERT INTO complaints (id, name, description, status, phone, add
 
 // 2. 🔍 புகாரின் நிலையைத் தேடும் API
 // 2. 🔍 புகாரின் நிலையைத் தேடும் API
+// 2. 🔍 புகாரின் நிலையைத் தேடும் API
 app.get('/api/complaint/:id', (req, res) => {
     const ticketId = req.params.id;
-    const query = "SELECT name, description, status FROM complaints WHERE id = ?";
+    const query = "SELECT name, description, status FROM complaint WHERE id = ?";
     
     db.query(query, [ticketId], (err, result) => {
         if (err) {
