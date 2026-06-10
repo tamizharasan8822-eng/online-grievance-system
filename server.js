@@ -53,13 +53,13 @@ app.post('/api/complaint', upload.single('photo'), (req, res) => {
     // போட்டோ இருந்தா அதோட லிங்க், இல்லனா வெற்று உரை
     const photoInfo = req.file ? ` [Photo: /uploads/${req.file.filename}]` : ''; 
     
-    // புதிய கம்ப்ளைன்ட் ஐடி (REG + 6 எண்கள்)
-   const complaintId = Math.floor(100000 + Math.random() * 900000);
+   // புதிய கம்ப்ளைன்ட் ஐடி (REG + 6 எண்கள்)
+    const complaintId = Math.floor(100000 + Math.random() * 900000);
     // விவரத்தையும் போட்டோ பெயரையும் ஒன்றாக இணைக்கிறோம்
     const finalDetails = details + photoInfo;
 
-const query = "INSERT INTO complaints (id, name, description, status, phone, address, ward, complaint_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    db.query(query, [complaintId, name, finalDetails, 'Pending', '0000000000', 'N/A', '1', 'Hardware'], (err, result) => {
+    const query = "INSERT INTO complaint (id, name, description, status, phone, address, ward, complaint_type) VALUES (?, ?, ?, 'Pending', '0000000000', 'N/A', '1', 'Hardware')";
+    db.query(query, [complaintId, name, finalDetails], (err, result) => {
         if (err) {
             console.error("Database Error: ", err);
             return res.status(500).json({ error: err.message });
@@ -68,8 +68,6 @@ const query = "INSERT INTO complaints (id, name, description, status, phone, add
     });
 });
 
-// 2. 🔍 புகாரின் நிலையைத் தேடும் API
-// 2. 🔍 புகாரின் நிலையைத் தேடும் API
 // 2. 🔍 புகாரின் நிலையைத் தேடும் API
 app.get('/api/complaint/:id', (req, res) => {
     const ticketId = req.params.id;
@@ -86,18 +84,6 @@ app.get('/api/complaint/:id', (req, res) => {
         res.json(result); 
     });
 });
-});
-// அட்மின் பேனல் HTML ஃபைலை நேரடியாக ஓபன் செய்ய
-app.get('/admin.html', (req, res) => {
-    res.sendFile(__dirname + '/admin.html');
-});
-// 📑 1. அட்மின் பேனலுக்காக எல்லா புகார்களையும் தேதி வாரியாக எடுக்கும் API
-app.get('/api/admin/complaints', (req, res) => {
-    const sql = 'SELECT * FROM complaints ORDER BY created_at DESC';
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error("Database error:", err);
-            return res.status(500).json({ error: "டேட்டாபேஸ் எர்ரர்!" });
         }
         res.json(results);
     });
