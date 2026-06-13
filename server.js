@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// அண்ணே, இது எர்ரர் இல்லாம மெயின் index.html இருக்கும் இடத்தை கச்சிதமாக சர்வருக்கு அடையாளம் காட்டும்!
+// மெயின் index.html இருக்கும் இடத்தை சர்வருக்கு அடையாளம் காட்டுகிறோம்
 const rootDir = path.resolve(process.cwd());
 app.use(express.static(rootDir));
 
@@ -24,12 +24,31 @@ const db = mysql.createConnection({
     }
 });
 
+// அண்ணே! டேபிளை அதுவே தானாக உருவாக்க வைக்கும் மேஜிக் கோடு இதுதான்!
 db.connect((err) => {
     if (err) {
         console.error('Database connection failed:', err.message);
         return;
     }
     console.log('MySQL Connected Successfully to AWS/Aiven...');
+
+    // புகார் டேபிளை தானாகவே உருவாக்குகிறோம் அண்ணே
+    const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS complaint (
+            id INT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            description TEXT NOT NULL,
+            status VARCHAR(50) DEFAULT 'Pending'
+        );
+    `;
+    
+    db.query(createTableQuery, (tableErr, result) => {
+        if (tableErr) {
+            console.error('Error creating table:', tableErr.message);
+        } else {
+            console.log('Complaint table checked/created successfully!');
+        }
+    });
 });
 
 // ஹோம் பேஜ் லோடிங்
