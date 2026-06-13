@@ -1,13 +1,17 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const path = require('path'); // ஃபைல் பாதையை இணைக்க இது தேவை அண்ணே
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Render-ல் இருக்கும் 5 தனித்தனி வேரியபிள்களை நேரடியாக இணைக்கிறோம் அண்ணே!
+// அண்ணே, இதுதான் உங்க மெயின் index.html ஃபைலை வெப்சைட்டின் ஹோம் பேஜாக மாற்றும் மேஜிக் வரி!
+app.use(express.static(path.join(__dirname, '../')));
+
+// Render-ல் இருக்கும் 5 தனித்தனி வேரியபிள்களை நேரடியாக இணைக்கிறோம்
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -15,7 +19,7 @@ const db = mysql.createConnection({
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 3306,
     ssl: {
-        rejectUnauthorized: false // கிளவுட் டேட்டாபேஸ் கனெக்ட் ஆக இது ரொம்ப முக்கியம்!
+        rejectUnauthorized: false
     }
 });
 
@@ -25,6 +29,11 @@ db.connect((err) => {
         return;
     }
     console.log('MySQL Connected Successfully to AWS/Aiven...');
+});
+
+// ஹோம் பேஜிற்குச் செல்லும்போது index.html ஃபைலைத் திறக்கச் சொல்கிறோம்
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 // 1. புகாரைப் பதிவு செய்யும் API (POST)
