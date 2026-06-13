@@ -1,74 +1,59 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const path = require('path');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
 app.use(express.json());
 
-// 📝 ஃபிரண்ட்-எண்ட் HTML ஃபைல்களை சர்வர் மூலமாகவே ஓபன் செய்ய வைக்கும் கோடு
-app.use(express.static(path.join(__dirname)));
-
-// டேட்டாபேஸ் கனெக்ஷன்
-const db = mysql.createConnection({
-    host: process.env.DB_HOST || 'mysql-grievance.alwaysdata.net',
-    user: process.env.DB_USER || 'grievance',
-    password: process.env.DB_PASSWORD || 'Grievance@123',
-    database: process.env.DB_NAME || 'grievance_system',
-    port: process.env.DB_PORT || 3306
-});
+// MySQL கனெக்ஷன்
+const db = mysql.createConnection(process.env.DATABASE_URL);
 
 db.connect((err) => {
     if (err) {
-        console.error("Database connection failed: ", err);
-    } else {
-        console.log("Connected to AlwaysData MySQL Database!");
+        console.error('Database connection failed:', err.stack);
+        return;
     }
+    console.log('MySQL Connected Successfully...');
 });
 
-// வெப்சைட்டின் முதல் பக்கமாக index.html-ஐ ஓபன் செய்ய வைப்பது
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// 1. 📝 புதிய புகாரைப் பதிவு செய்யும் API (POST METHOD)
+// 1. புகாரைப் பதிவு செய்யும் API (POST)
 app.post('/api/complaint', (req, res) => {
-    const { name, details, photoInfo } = req.body;
-    const complaintId = Math.floor(100000 + Math.random() * 900000);
-    const finalDetails = details + (photoInfo ? " | Photo: " + photoInfo : "");
-
-    const query = "INSERT INTO complaint (id, name, description, status, phone, address, ward, complaint_type) VALUES (?, ?, ?, 'Pending', '0000000000', 'N/A', '1', 'Hardware')";
-    db.query(query, [complaintId, name, finalDetails], (err, result) => {
-        if (err) {
-            console.error("Database Error: ", err);
-            return res.status(500).json({ error: err.message });
-        }
-        res.json({ success: true, id: complaintId });
-    });
-});
-
-// 2. 🔍 புகாரின் நிலையைத் தேடும் API (GET METHOD)
-app.get('/api/complaint/:id', (req, res) => {
-    const ticketId = req.params.id;
-    const query = "SELECT name, description, status FROM complaint WHERE id = ?";
+    const { name, details } = req.body;
     
-    db.query(query, [ticketId], (err, result) => {
+    // 6 இலக்க ரேண்டம் டிக்கெட் ஐடி
+    const ticketId = Math.floor(100000 + Math.random() * 900000); 
+
+    // உங்க டேட்டாபேஸ்ல இருக்குற அசல் காலம் பெயர்கள்: id, title, description, status
+    // 'name'-ஐ 'title' ஆகவும், 'details'-ஐ 'description' ஆகவும் அனுப்புகிறோம்!
+    const query = "INSERT INTO complaint (id, title, description, status) VALUES (?, ?, ?, 'Pending')";
+    
+    db.query(query, [ticketId, name, details], (err, result) => {
         if (err) {
-            console.error("Database error:", err);
-            return res.status(500).json({ error: "Database error" });
+            return res.status(500).json({ success: false, error: err.message });
         }
-        if (result.length === 0) {
-            return res.status(404).json({ error: "Ticket not found" });
-        }
-        res.json(result); 
+        res.json({ success: true, id: ticketId });
     });
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
+// 2. புகாரின் நிலையைத் தேடும் API (GET)
+app.get('/api/complaint/:id', (req, res) => {
+    const { id } = req.params;
+    
+    // டேட்டாபேஸ்ல இருந்து துல்லியமாக விபரங்களை எடுக்கும் குயரி
+    const query = "SELECT id, title, description, status FROM complaint WHERE id = ?";
+    
+    db.query(query, [id], (err, results) => {
+        if (err) {
+            return res.status(500).json({ success: false, error: err.message });
+        }
+        res.json(results);
+    });
+});
+
+// சர்வர் போர்ட்
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running perfectly on port ${PORT}`);
 });
