@@ -6,93 +6,122 @@
     <title>Online Grievance System</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-        }
-        h2, h3 {
-            color: #333;
-        }
-        form {
-            background: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
             padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 500px;
+            background-color: #f4f6f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h2 {
+            color: #1e3a8a;
             margin-bottom: 20px;
+            font-size: 24px;
         }
         label {
             display: block;
-            margin-top: 10px;
-            font-weight: bold;
+            margin-top: 15px;
+            font-weight: 600;
+            color: #374151;
         }
-        input, textarea {
+        input, textarea, select {
             width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
             box-sizing: border-box;
+            background-color: #fff;
         }
         button {
-            margin-top: 15px;
-            padding: 10px 15px;
-            background-color: #28a745;
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #2563eb;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: bold;
         }
         button:hover {
-            background-color: #218838;
+            background-color: #1d4ed8;
         }
         .track-section {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            max-width: 500px;
+            margin-top: 35px;
+            border-top: 2px solid #e5e7eb;
+            padding-top: 20px;
         }
-        /* பழைய கிரீன் கலர் பாக்ஸ் ஸ்டைல் */
+        .track-section h3 {
+            color: #1e3a8a;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        #checkStatusBtn {
+            background-color: #1f2937;
+        }
+        #checkStatusBtn:hover {
+            background-color: #111827;
+        }
+        /* நீங்க ஆசைப்பட்ட அந்தப் பழைய பளபளப்பான பச்சை கலர் பாக்ஸ் */
         .status-box {
-            margin-top: 20px;
+            margin-top: 25px;
             padding: 15px;
             border: 2px solid #28a745;
             background-color: #d4edda;
             color: #155724;
-            border-radius: 5px;
+            border-radius: 6px;
             display: none;
-            max-width: 500px;
         }
     </style>
 </head>
 <body>
 
-    <h2>Online Grievance System</h2>
-    
-    <form id="grievanceForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" required placeholder="Enter your name">
+    <div class="container">
+        <h2>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
+        
+        <form id="grievanceForm">
+            <label for="name">Employee Name / ID:</label>
+            <input type="text" id="name" required placeholder="e.g., Tamilarasan">
 
-        <label for="details">Complaint Details:</label>
-        <textarea id="details" rows="4" required placeholder="Enter complaint details"></textarea>
+            <label for="component">Select Faulty Component:</label>
+            <select id="component">
+                <option value="Mouse Not Working">Mouse Not Working</option>
+                <option value="Keyboard Problem">Keyboard Problem</option>
+                <option value="Monitor Issue">Monitor Issue</option>
+                <option value="RAM Problem">RAM Problem</option>
+                <option value="OS / Software Error">OS / Software Error</option>
+            </select>
 
-        <button type="submit">Submit Complaint</button>
-    </form>
+            <label for="details">Grievance Description:</label>
+            <textarea id="details" rows="4" required placeholder="Describe the problem..."></textarea>
 
-    <div class="track-section">
-        <h3>Track Ticket Status</h3>
-        <label for="ticketIdInput">Enter Ticket ID:</label>
-        <input type="text" id="ticketIdInput" placeholder="Enter 6-digit Ticket ID">
-        <button type="button" id="checkStatusBtn" style="background-color: #007bff;">Check Status</button>
-    </div>
+            <label for="photo">Upload Proof/Photo:</label>
+            <input type="file" id="photo">
 
-    <div id="statusResult" class="status-box">
-        <h4>📋 Complaint Details:</h4>
-        <p><strong>👤 Name:</strong> <span id="resName"></span></p>
-        <p><strong>📄 Description:</strong> <span id="resDesc"></span></p>
-        <p><strong>⚡ Status:</strong> <span id="resStatus"></span></p>
+            <button type="submit">Submit Ticket to IT Team</button>
+        </form>
+
+        <div class="track-section">
+            <h3>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h3>
+            <label for="ticketIdInput">Enter Complaint Reference Number:</label>
+            <input type="text" id="ticketIdInput" placeholder="e.g., REG123456">
+            <button type="button" id="checkStatusBtn">Check Status</button>
+        </div>
+
+        <div id="statusResult" class="status-box">
+            <h4>📋 Complaint Details:</h4>
+            <p><strong>👤 Name:</strong> <span id="resName"></span></p>
+            <p><strong>📄 Description:</strong> <span id="resDesc"></span></p>
+            <p><strong>⚡ Status:</strong> <span id="resStatus"></span></p>
+        </div>
     </div>
 
     <script>
@@ -102,7 +131,11 @@
         document.getElementById('grievanceForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('name').value;
-            const details = document.getElementById('details').value;
+            const component = document.getElementById('component').value;
+            const description = document.getElementById('details').value;
+            
+            // காம்போனன்ட் பெயரையும் விபரத்தையும் சேர்க்கிறோம்
+            const details = `[${component}] ${description}`;
 
             try {
                 const response = await fetch(API_URL, {
@@ -113,7 +146,7 @@
 
                 const data = await response.json();
                 if (data.success) {
-                    alert(`✓ Complaint Submitted Successfully!\nYour Ticket ID is: ${data.id}`);
+                    alert(`✓ Ticket Raised Successfully!\nYour Complaint Reference Number is: ${data.id}`);
                     document.getElementById('ticketIdInput').value = data.id;
                     document.getElementById('grievanceForm').reset();
                 } else {
@@ -121,7 +154,7 @@
                 }
             } catch (error) {
                 console.error("Error:", error);
-                alert("❌ Server Error!");
+                alert("❌ Server Connection Error!");
             }
         });
 
@@ -129,7 +162,7 @@
         document.getElementById('checkStatusBtn').addEventListener('click', async () => {
             const ticketId = document.getElementById('ticketIdInput').value.trim();
             if (!ticketId) {
-                alert("Please enter a Ticket ID");
+                alert("Please enter a Complaint Reference Number");
                 return;
             }
 
@@ -148,7 +181,7 @@
                     document.getElementById('resDesc').innerText = ticket.description || "N/A";
                     document.getElementById('resStatus').innerText = ticket.status || "Pending";
                     
-                    // பச்சை பாக்ஸை காட்டுகிறது
+                    // பச்சை பாக்ஸை கப்புனு காட்டுகிறது
                     document.getElementById('statusResult').style.display = 'block';
                 } else {
                     alert("❌ Ticket Not Found!");
