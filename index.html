@@ -70,7 +70,6 @@
         #checkStatusBtn:hover {
             background-color: #111827;
         }
-        /* நீங்க ஆசைப்பட்ட அந்தப் பழைய பளபளப்பான பச்சை கலர் பாக்ஸ் */
         .status-box {
             margin-top: 25px;
             padding: 15px;
@@ -89,7 +88,7 @@
         
         <form id="grievanceForm">
             <label for="name">Employee Name / ID:</label>
-            <input type="text" id="name" required placeholder="e.g., Tamilarasan">
+            <input type="text" id="name" required placeholder="e.g., DHIVYAPRIYA">
 
             <label for="component">Select Faulty Component:</label>
             <select id="component">
@@ -134,14 +133,13 @@
             const component = document.getElementById('component').value;
             const description = document.getElementById('details').value;
             
-            // காம்போனன்ட் பெயரையும் விபரத்தையும் சேர்க்கிறோம்
             const details = `[${component}] ${description}`;
 
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, details, photoInfo: "" })
+                    body: JSON.stringify({ name, details })
                 });
 
                 const data = await response.json();
@@ -160,14 +158,14 @@
 
         // 2. ஸ்டேட்டஸ் செக் செய்யும் பகுதி
         document.getElementById('checkStatusBtn').addEventListener('click', async () => {
-            const ticketId = document.getElementById('ticketIdInput').value.trim();
-            if (!ticketId) {
+            const trackId = document.getElementById('ticketIdInput').value.trim();
+            if (!trackId) {
                 alert("Please enter a Complaint Reference Number");
                 return;
             }
 
             try {
-                const response = await fetch(`${API_URL}/${ticketId}`);
+                const response = await fetch(`${API_URL}/${trackId}`);
                 if (response.status === 404) {
                     alert("❌ Ticket Not Found!");
                     document.getElementById('statusResult').style.display = 'none';
@@ -177,11 +175,12 @@
                 const data = await response.json();
                 if (data && data.length > 0) {
                     const ticket = data[0];
-                    document.getElementById('resName').innerText = ticket.name || "N/A";
+                    
+                    // டேட்டாபேஸ்ல இருந்து 'title' ஆக வருவதை 'Name' பாக்ஸ்ல போடுகிறோம்!
+                    document.getElementById('resName').innerText = ticket.title || "N/A";
                     document.getElementById('resDesc').innerText = ticket.description || "N/A";
                     document.getElementById('resStatus').innerText = ticket.status || "Pending";
                     
-                    // பச்சை பாக்ஸை கப்புனு காட்டுகிறது
                     document.getElementById('statusResult').style.display = 'block';
                 } else {
                     alert("❌ Ticket Not Found!");
