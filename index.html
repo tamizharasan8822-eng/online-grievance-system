@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Grievance System</title>
+    <title>IT Support Grievance System</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -84,7 +84,7 @@
 <body>
 
     <div class="container">
-        <h2>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
+        <h2>💻 IT Support (தகவல் தொழில்நுட்ப ஆதரவு)</h2>
         
         <form id="grievanceForm">
             <label for="name">Employee Name / ID:</label>
@@ -111,7 +111,7 @@
         <div class="track-section">
             <h3>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h3>
             <label for="ticketIdInput">Enter Complaint Reference Number:</label>
-            <input type="text" id="ticketIdInput" placeholder="e.g., REG123456">
+            <input type="text" id="ticketIdInput" placeholder="e.g., 766644">
             <button type="button" id="checkStatusBtn">Check Status</button>
         </div>
 
@@ -176,7 +176,6 @@
                 if (data && data.length > 0) {
                     const ticket = data[0];
                     
-                    // டேட்டாபேஸ்ல இருந்து 'title' ஆக வருவதை 'Name' பாக்ஸ்ல போடுகிறோம்!
                     document.getElementById('resName').innerText = ticket.title || "N/A";
                     document.getElementById('resDesc').innerText = ticket.description || "N/A";
                     document.getElementById('resStatus').innerText = ticket.status || "Pending";
