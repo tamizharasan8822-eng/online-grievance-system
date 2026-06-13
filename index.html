@@ -3,207 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Support - Hardware & Software Grievance Portal</title>
+    <title>IT Support - Hardware & Software Grievance</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: #f3f4f6; }
-        .header { background-color: #1e293b; color: white; padding: 25px; text-align: center; border-bottom: 5px solid #3b82f6; }
-        .header h1 { margin: 0; font-size: 26px; }
-        .container { max-width: 850px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .section-title { color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; margin-top: 30px; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; color: #4b5563; }
-        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 5px; box-sizing: border-box; }
-        button { background-color: #2563eb; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; }
-        button:hover { background-color: #1d4ed8; }
-        .btn-track { background-color: #0f172a; margin-top: 10px; }
-        .alert { padding: 15px; margin-top: 20px; border-radius: 5px; display: none; }
-        .alert-success { background-color: #dcfce7; color: #14532d; }
-        .alert-info { background-color: #e0f2fe; color: #0369a1; }
-        .alert-danger { background-color: #fee2e2; color: #991b1b; }
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0,0,0,0.1); }
+        h2, h3 { text-align: center; color: #333; }
+        label { font-weight: bold; display: block; margin-top: 10px; }
+        input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; margin-top: 15px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        .status-box { margin-top: 20px; padding: 15px; border: 2px solid #28a745; background-color: #d4edda; color: #155724; border-radius: 5px; display: none; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>IT HELP DESK & SUPPORT PORTAL</h1>
-        <p>Hardware & Software Grievance Management System</p>
+
+<div class="container">
+    <h2>📝 IT Support Grievance Form</h2>
+    <form id="grievanceForm">
+        <label for="name">👤 Name:</label>
+        <input type="text" id="name" required placeholder="Enter your name">
+
+        <label for="details">📄 Complaint Details:</label>
+        <textarea id="details" rows="4" required placeholder="Describe your issue (e.g., Mouse not working)"></textarea>
+
+        <button type="submit">Submit Complaint</button>
+    </form>
+
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #ccc;">
+
+    <h3>🔍 Track Ticket Status</h3>
+    <input type="text" id="ticketIdInput" placeholder="Enter your 6-digit Ticket ID">
+    <button type="button" id="checkStatusBtn" style="background-color: #007bff;">Check Status</button>
+
+    <div id="statusResult" class="status-box">
+        <h4>📋 Complaint Details:</h4>
+        <p><strong>👤 Name:</strong> <span id="resName"></span></p>
+        <p><strong>📄 Description:</strong> <span id="resDesc"></span></p>
+        <p><strong>⚡ Status:</strong> <span id="resStatus"></span></p>
     </div>
-    <div class="container">
-        <h2 class="section-title">💻 Register IT Issue (புதிய புகார் பதிவு செய்தல்)</h2>
-        <div class="form-group">
-            <label>Employee Name / ID:</label>
-            <input type="text" id="userName" placeholder="e.g., Tamilarasan">
-        </div>
-        <div class="form-group">
-            <label>Select Faulty Component:</label>
-            <select id="hardwareComponent">
-                <option value="Mouse">Mouse Not Working</option>
-                <option value="Keyboard">Keyboard Not Working</option>
-                <option value="Monitor">Monitor Problem / No Display</option>
-                <option value="Motherboard">Motherboard Issue</option>
-                <option value="RAM">RAM Problem</option>
-                <option value="SMPS">SMPS Problem / Power Issue</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Grievance Description:</label>
-            <textarea id="complaintDetails" rows="4" placeholder="Describe the problem..."></textarea>
-        </div>
-        <div class="form-group">
-            <label>Upload Proof/Photo:</label>
-            <input type="file" id="complaintPhoto" accept="image/*">
-        </div>
-        <button onclick="submitGrievance()">Submit Ticket to IT Team</button>
-        <div id="regResult" class="alert alert-success"></div>
+</div>
 
-        <h2 class="section-title">🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
-        <div class="form-group">
-            <label>Enter Complaint Reference Number:</label>
-            <input type="text" id="trackId" placeholder="e.g., REG123456">
-        </div>
-        <button class="btn-track" onclick="trackGrievance()">Check Status</button>
-        <div id="trackResult" class="alert"></div>
-    </div>
+<script>
+    const API_URL = "https://it-hardware-support.onrender.com/api/complaint";
 
-    <script>
-      const API_BASE_URL = 'https://online-grievance-system.onrender.com';
-        function submitGrievance() {
-            const name = document.getElementById('userName').value;
-            const component = document.getElementById('hardwareComponent').value;
-            const details = document.getElementById('complaintDetails').value;
-            const photoFile = document.getElementById('complaintPhoto').files[0];
-            const regResult = document.getElementById('regResult');
+    // 1. புதிய புகாரை சப்மிட் செய்யும் பகுதி
+    document.getElementById('grievanceForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        const details = document.getElementById('details').value;
 
-            if(!name || !details) {
-                alert('Please fill all required fields!');
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, details, photoInfo: "" })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                alert(`✓ Complaint Submitted Successfully!\n🎯 Your Ticket ID is: ${data.id}`);
+                document.getElementById('ticketIdInput').value = data.id;
+                document.getElementById('grievanceForm').reset();
+            } else {
+                alert("Error: " + data.error);
+            }
+        } catch (error) {
+            console.error("Error submitting complaint:", error);
+            alert("❌ Server Connection Error! Try again.");
+        }
+    });
+
+    // 2. டிக்கெட் ஸ்டேட்டஸை தேடும் பகுதி
+    document.getElementById('checkStatusBtn').addEventListener('click', async () => {
+        const ticketId = document.getElementById('ticketIdInput').value.trim();
+        if (!ticketId) {
+            alert("Please enter a Ticket ID");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/${ticketId}`);
+            if (response.status === 404) {
+                alert("❌ Ticket Not Found! Please check the ID.");
+                document.getElementById('statusResult').style.display = 'none';
                 return;
             }
 
-            // போட்டோ மற்றும் டேட்டாவை சர்வருக்கு அனுப்ப FormData பயன்படுத்த வேண்டும்
-            const formData = new FormData();
-            formData.append('name', name);
-            formData.append('details', `[${component}] ${details}`);
-            if(photoFile) {
-                formData.append('photo', photoFile);
+            const data = await response.json();
+            if (data && data.length > 0) {
+                // டேட்டாபேஸ்ல இருந்து வர்ற முதல் மதிப்பை எடுக்கிறோம்
+                const ticket = data[0]; 
+                
+                document.getElementById('resName').innerText = ticket.name || "N/A";
+                document.getElementById('resDesc').innerText = ticket.description || "N/A";
+                document.getElementById('resStatus').innerText = ticket.status || "Pending";
+                
+                // பச்சை பாக்ஸை ஸ்கிரீனில் காட்டுகிறோம்
+                document.getElementById('statusResult').style.display = 'block';
+            } else {
+                alert("❌ Ticket Not Found!");
+                document.getElementById('statusResult').style.display = 'none';
             }
-fetch(`${API_BASE_URL}/api/complaint`, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(`✓ Ticket Raised Successfully!\nYour Complaint Reference Number is: ${data.id}`);
-        } else {
-            alert(`❌ Error: ${data.error}`);
+        } catch (error) {
+            console.error("Error fetching status:", error);
+            alert("❌ Error connecting to server!");
         }
-    })
-    .catch(err => {
-        console.error(err);
-        alert('Error submitting complaint');
     });
-}
-
-function trackGrievance() {
-    const trackId = document.getElementById('trackId').value;
-    if (!trackId) {
-        alert('Please enter a Complaint Reference Number');
-        return;
-    }
-
-    fetch(`${API_BASE_URL}/api/complaint/${trackId}`)
-        .then(response => response.json())
-       .then(data => {
-            const trackResult = document.getElementById('trackResult');
-            if (data.error || !data || data.length === 0) {
-                trackResult.className = "alert alert-danger";
-                trackResult.innerHTML = `❌ Error: Ticket Not Found`;
-            } else {
-                const ticket = data[0]; // டேட்டாபேஸ்ல இருந்து வர்ற முதல் ரோ-வை எடுக்கிறோம்!
-                trackResult.className = "alert alert-success";
-                trackResult.innerHTML = `
-                    <strong>📝 Complaint Details:</strong><br>
-                    👤 Name: ${ticket.name}<br>
-                    📄 Description: ${ticket.description}<br>
-                    ⚡ Status: <strong>${ticket.status}</strong>
-                `;
-            }
-            trackResult.style.display = 'block';
-        })
-            trackResult.style.display = 'block';
-        })
-        .catch(err => {
-            console.error(err);
-            alert('Error fetching ticket status');
-        });
-}
 </script>
-</body>
-</html>
-        return;
-    }
 
-    fetch(`/api/complaint/${trackId}`)
-        .then(response => response.json())
-        .then(data => {
-            const trackResult = document.getElementById('trackResult');
-            if (data.error) {
-                trackResult.className = "alert alert-danger";
-                trackResult.innerHTML = `❌ Error: ${data.error}`;
-            } else {
-                trackResult.className = "alert alert-success";
-                trackResult.innerHTML = `
-                    <strong>📋 Complaint Details:</strong><br>
-                    👤 Name: ${data.name}<br>
-                    📝 Description: ${data.description}<br>
-                    ⚡ Status: <strong>${data.status}</strong>
-                `;
-            }
-            trackResult.style.display = 'block';
-        })
-        .catch(err => {
-            console.error(err);
-            alert('Error fetching ticket status');
-        });
-}
-</script>
-</body>
-</html>
-        alert('Error submitting complaint');
-    });
-}
-
-function trackGrievance() {
-    const trackId = document.getElementById('trackId').value;
-    if (!trackId) {
-        alert('Please enter a Complaint Reference Number');
-        return;
-    }
-
-    fetch(`/api/complaint/${trackId}`)
-        .then(response => response.json())
-        .then(data => {
-            const trackResult = document.getElementById('trackResult');
-            if (data.error) {
-                trackResult.className = "alert alert-danger";
-                trackResult.innerHTML = `❌ Error: ${data.error}`;
-            } else {
-                trackResult.className = "alert alert-success";
-                trackResult.innerHTML = `
-                    <strong>📋 Complaint Details:</strong><br>
-                    👤 Name: ${data.name}<br>
-                    🔧 Faulty Component: ${data.hardware_component || 'N/A'}<br>
-                    📝 Description: ${data.description}<br>
-                    📍 Ward: ${data.ward || 'N/A'}<br>
-                    ⚡ Status: <strong>${data.status}</strong>
-                `;
-            }
-            trackResult.style.display = 'block';
-        })
-        .catch(err => {
-            console.error(err);
-            alert('Error fetching ticket status');
-        });
-}
-</script>
 </body>
 </html>
