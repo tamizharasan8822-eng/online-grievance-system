@@ -8,8 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// அண்ணே, இதுதான் ரெண்டர் சர்வருக்குள் இருக்கும் index.html-ன் அக்யூரேட் லொகேஷன்!
-const rootDir = path.resolve(__dirname, '..');
+// அண்ணே, இது எர்ரர் இல்லாம மெயின் index.html இருக்கும் இடத்தை கச்சிதமாக சர்வருக்கு அடையாளம் காட்டும்!
+const rootDir = path.resolve(process.cwd());
 app.use(express.static(rootDir));
 
 // Render Environment Variables இணைப்பு
