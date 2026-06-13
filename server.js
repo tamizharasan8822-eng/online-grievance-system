@@ -1,17 +1,18 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-const path = require('path'); // ஃபைல் பாதையை இணைக்க இது தேவை அண்ணே
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// அண்ணே, இதுதான் உங்க மெயின் index.html ஃபைலை வெப்சைட்டின் ஹோம் பேஜாக மாற்றும் மேஜிக் வரி!
-app.use(express.static(path.join(__dirname, '../')));
+// அண்ணே, இது எந்த குழப்பமும் இல்லாம மெயின் ஃபோல்டரில் இருக்கும் index.html-ஐ கச்சிதமாக இணைக்கும்!
+const rootDir = path.join(__dirname, '..');
+app.use(express.static(rootDir));
 
-// Render-ல் இருக்கும் 5 தனித்தனி வேரியபிள்களை நேரடியாக இணைக்கிறோம்
+// Render Environment Variables இணைப்பு
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -31,9 +32,9 @@ db.connect((err) => {
     console.log('MySQL Connected Successfully to AWS/Aiven...');
 });
 
-// ஹோம் பேஜிற்குச் செல்லும்போது index.html ஃபைலைத் திறக்கச் சொல்கிறோம்
+// ஹோம் பேஜ் லோடிங் பக்கா ரூட் பாத் அண்ணே
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../index.html'));
+    res.sendFile(path.join(rootDir, 'index.html'));
 });
 
 // 1. புகாரைப் பதிவு செய்யும் API (POST)
