@@ -7,25 +7,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MySQL கனெக்ஷன்
-const db = mysql.createConnection(process.env.DATABASE_URL);
+// Render-ல் இருக்கும் 5 தனித்தனி வேரியபிள்களை நேரடியாக இணைக்கிறோம் அண்ணே!
+const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306,
+    ssl: {
+        rejectUnauthorized: false // கிளவுட் டேட்டாபேஸ் கனெக்ட் ஆக இது ரொம்ப முக்கியம்!
+    }
+});
 
 db.connect((err) => {
     if (err) {
-        console.error('Database connection failed:', err.stack);
+        console.error('Database connection failed:', err.message);
         return;
     }
-    console.log('MySQL Connected Successfully...');
+    console.log('MySQL Connected Successfully to AWS/Aiven...');
 });
 
-// 1. புகாரைப் பதிவு செய்யும் API (POST) - ID எர்ரர் முழுமையாக சரி செய்யப்பட்டது!
+// 1. புகாரைப் பதிவு செய்யும் API (POST)
 app.post('/api/complaint', (req, res) => {
     const { name, details } = req.body;
-    
-    // 6 இலக்க ரேண்டம் டிக்கெட் ஐடி உருவாக்கி, அதை நேரடியாக 'id' காலமிற்கு அனுப்புகிறோம்!
     const ticketId = Math.floor(100000 + Math.random() * 900000); 
 
-    // உங்க டேட்டாபேஸ் அசல் காலம்கள்: id, title, description, status
     const query = "INSERT INTO complaint (id, title, description, status) VALUES (?, ?, ?, 'Pending')";
     
     db.query(query, [ticketId, name, details], (err, result) => {
@@ -40,7 +46,6 @@ app.post('/api/complaint', (req, res) => {
 // 2. புகாரின் நிலையைத் தேடும் API (GET)
 app.get('/api/complaint/:id', (req, res) => {
     const { id } = req.params;
-    
     const query = "SELECT id, title, description, status FROM complaint WHERE id = ?";
     
     db.query(query, [id], (err, results) => {
@@ -51,7 +56,6 @@ app.get('/api/complaint/:id', (req, res) => {
     });
 });
 
-// சர்வர் போர்ட்
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running perfectly on port ${PORT}`);
