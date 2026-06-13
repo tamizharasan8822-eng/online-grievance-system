@@ -2,12 +2,16 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
+
+// 📝 ஃபிரண்ட்-எண்ட் HTML ஃபைல்களை சர்வர் மூலமாகவே ஓபன் செய்ய வைக்கும் கோடு
+app.use(express.static(path.join(__dirname)));
 
 // டேட்டாபேஸ் கனெக்ஷன்
 const db = mysql.createConnection({
@@ -26,11 +30,14 @@ db.connect((err) => {
     }
 });
 
+// வெப்சைட்டின் முதல் பக்கமாக index.html-ஐ ஓபன் செய்ய வைப்பது
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // 1. 📝 புதிய புகாரைப் பதிவு செய்யும் API (POST METHOD)
 app.post('/api/complaint', (req, res) => {
     const { name, details, photoInfo } = req.body;
-    
-    // புதிய கம்ப்ளைன்ட் ஐடி (6 எண்கள்)
     const complaintId = Math.floor(100000 + Math.random() * 900000);
     const finalDetails = details + (photoInfo ? " | Photo: " + photoInfo : "");
 
@@ -61,7 +68,7 @@ app.get('/api/complaint/:id', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
