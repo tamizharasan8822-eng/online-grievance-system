@@ -8,8 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// அண்ணே, இது எந்த குழப்பமும் இல்லாம மெயின் ஃபோல்டரில் இருக்கும் index.html-ஐ கச்சிதமாக இணைக்கும்!
-const rootDir = path.join(__dirname, '..');
+// அண்ணே, இதுதான் ரெண்டர் சர்வருக்குள் இருக்கும் index.html-ன் அக்யூரேட் லொகேஷன்!
+const rootDir = path.resolve(__dirname, '..');
 app.use(express.static(rootDir));
 
 // Render Environment Variables இணைப்பு
@@ -32,7 +32,7 @@ db.connect((err) => {
     console.log('MySQL Connected Successfully to AWS/Aiven...');
 });
 
-// ஹோம் பேஜ் லோடிங் பக்கா ரூட் பாத் அண்ணே
+// ஹோம் பேஜ் லோடிங்
 app.get('/', (req, res) => {
     res.sendFile(path.join(rootDir, 'index.html'));
 });
