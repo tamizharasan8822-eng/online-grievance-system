@@ -18,19 +18,19 @@ db.connect((err) => {
     console.log('MySQL Connected Successfully...');
 });
 
-// 1. புகாரைப் பதிவு செய்யும் API (POST)
+// 1. புகாரைப் பதிவு செய்யும் API (POST) - ID எர்ரர் முழுமையாக சரி செய்யப்பட்டது!
 app.post('/api/complaint', (req, res) => {
     const { name, details } = req.body;
     
-    // 6 இலக்க ரேண்டம் டிக்கெட் ஐடி
+    // 6 இலக்க ரேண்டம் டிக்கெட் ஐடி உருவாக்கி, அதை நேரடியாக 'id' காலமிற்கு அனுப்புகிறோம்!
     const ticketId = Math.floor(100000 + Math.random() * 900000); 
 
-    // உங்க டேட்டாபேஸ்ல இருக்குற அசல் காலம் பெயர்கள்: id, title, description, status
-    // 'name'-ஐ 'title' ஆகவும், 'details'-ஐ 'description' ஆகவும் அனுப்புகிறோம்!
+    // உங்க டேட்டாபேஸ் அசல் காலம்கள்: id, title, description, status
     const query = "INSERT INTO complaint (id, title, description, status) VALUES (?, ?, ?, 'Pending')";
     
     db.query(query, [ticketId, name, details], (err, result) => {
         if (err) {
+            console.error('Database Insertion Error:', err.message);
             return res.status(500).json({ success: false, error: err.message });
         }
         res.json({ success: true, id: ticketId });
@@ -41,7 +41,6 @@ app.post('/api/complaint', (req, res) => {
 app.get('/api/complaint/:id', (req, res) => {
     const { id } = req.params;
     
-    // டேட்டாபேஸ்ல இருந்து துல்லியமாக விபரங்களை எடுக்கும் குயரி
     const query = "SELECT id, title, description, status FROM complaint WHERE id = ?";
     
     db.query(query, [id], (err, results) => {
