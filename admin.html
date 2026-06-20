@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Admin Dashboard with PDF Report</title>
+    <title>AMC Complaint Report for Admin Panel</title>
     <!-- PDF Libraries Included -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
@@ -11,7 +11,7 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #0f172a; margin: 0; padding: 20px; color: #e2e8f0; }
         .container { background-color: #1e293b; padding: 30px; border-radius: 12px; max-width: 1200px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        h2 { text-align: center; color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; margin-bottom: 20px; }
+        h2 { text-align: center; color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; margin-bottom: 20px; font-family: 'Segoe UI', Arial, sans-serif; }
         
         /* Filter Section Styles */
         .report-filter-box { background-color: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #334155; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
@@ -41,7 +41,8 @@
 <body>
 
 <div class="container">
-    <h2>📊 IT Support - அட்மின் கட்டுப்பாட்டு அறை & அறிக்கை (Admin Control)</h2>
+    <h2>📊 AMC Complaint Report for Admin Panel</h2>
+    <p style="text-align: center; color: #94a3b8;">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த அனைத்து புகார்களின் விபரம்:</p>
     
     <!-- CUSTOMIZABLE REPORT FILTER SECTION -->
     <div class="report-filter-box">
@@ -102,7 +103,6 @@
 
 <script>
     window.onload = function() {
-        // Automatically set current month and year as default filter
         const d = new Date();
         const currentMonth = String(d.getMonth() + 1).padStart(2, '0');
         const currentYear = String(d.getFullYear());
@@ -113,29 +113,21 @@
         loadAdminDashboard();
     };
 
-    // FILTERED DATABASE GETTER
     function getFilteredData() {
         let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
         const selectedMonth = document.getElementById('filterMonth').value;
         const selectedYear = document.getElementById('filterYear').value;
 
         return localDB.filter(ticket => {
-            // Ticket date format assumed: DD/MM/YYYY or MM/DD/YYYY based on locale
-            // To be safe, we split by '/' and check matching elements
             const dateParts = ticket.date.split('/'); 
-            if(dateParts.length < 3) return true; // fallback if date is weird
+            if(dateParts.length < 3) return true;
 
-            // Dynamic check for month and year position in string
             let ticketMonth = dateParts[1].padStart(2, '0');
             let ticketYear = dateParts[2];
             
-            // In some locales toLocaleDateString gives M/D/YYYY, let's adjust if year is parts[2]
-            if(dateParts[0].length === 4) { // YYYY/MM/DD format
+            if(dateParts[0].length === 4) {
                 ticketYear = dateParts[0];
                 ticketMonth = dateParts[1].padStart(2, '0');
-            } else if (dateParts[2].length === 4) { // DD/MM/YYYY or MM/DD/YYYY
-                // Standard checking
-                ticketYear = dateParts[2];
             }
 
             const matchMonth = (selectedMonth === "ALL" || ticketMonth === selectedMonth);
@@ -229,10 +221,9 @@
         }
     }
 
-    // GENERATE JSPDFF AUTO-TABLE REPORT
     function generatePDFReport() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'pt', 'a4'); // Landscape layout for wider table view
+        const doc = new jsPDF('l', 'pt', 'a4');
         
         let filteredData = getFilteredData();
         if(filteredData.length === 0) { alert('பதிவிறக்க எந்த தரவும் இல்லை!'); return; }
@@ -240,17 +231,15 @@
         const monthSel = document.getElementById('filterMonth').options[document.getElementById('filterMonth').selectedIndex].text;
         const yearSel = document.getElementById('filterYear').value;
 
-        // Title Header
         doc.setFontSize(18);
         doc.setTextColor(30, 58, 138);
-        doc.text("TNEB IT Support & EB AMC Grievance Monthly Report", 40, 40);
+        doc.text("AMC Complaint Report for Admin Panel", 40, 40);
         
         doc.setFontSize(11);
         doc.setTextColor(100);
         doc.text(`Report Filter: Month: ${monthSel} | Year: ${yearSel}`, 40, 60);
         doc.text(`Generated Date: ${new Date().toLocaleDateString()}`, 40, 75);
 
-        // Prep Table Rows Data
         const tableRows = [];
         filteredData.forEach(t => {
             let closingNoteText = t.adminClosingNotes ? `\n[Notes: ${t.adminClosingNotes}]` : '';
@@ -266,7 +255,6 @@
             tableRows.push(rowData);
         });
 
-        // Generate Table
         doc.autoTable({
             startY: 95,
             head: [['Ticket ID', 'Staff Name', 'Section', 'Component Fault', 'Problem Details / Action Taken', 'Date', 'Status']],
@@ -275,12 +263,11 @@
             headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255], fontStyle: 'bold' },
             styles: { fontSize: 9, cellPadding: 8 },
             columnStyles: {
-                4: { cellWidth: 200 }, // give wider column size for descriptions
+                4: { cellWidth: 200 },
             }
         });
 
-        // Save PDF File
-        doc.save(`IT_Support_Report_${monthSel}_${yearSel}.pdf`);
+        doc.save(`AMC_Complaint_Report_${monthSel}_${yearSel}.pdf`);
     }
 </script>
 </body>
