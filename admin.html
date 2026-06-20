@@ -3,19 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Admin Dashboard</title>
+    <title>IT Admin Dashboard with PDF Report</title>
+    <!-- PDF Libraries Included -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #0f172a; margin: 0; padding: 20px; color: #e2e8f0; }
-        .container { background-color: #1e293b; padding: 30px; border-radius: 12px; max-width: 1100px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        h2 { text-align: center; color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #334155; font-size: 13px; }
+        .container { background-color: #1e293b; padding: 30px; border-radius: 12px; max-width: 1200px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        h2 { text-align: center; color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        /* Filter Section Styles */
+        .report-filter-box { background-color: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #334155; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: 13px; color: #94a3b8; font-weight: bold; }
+        .filter-input { padding: 10px; background-color: #1e293b; color: white; border: 1px solid #475569; border-radius: 6px; min-width: 150px; }
+        
+        .btn-pdf { background-color: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 40px; transition: background 0.2s; }
+        .btn-pdf:hover { background-color: #059669; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: #334155; font-size: 13px; }
         th, td { border: 1px solid #475569; padding: 12px; text-align: left; }
         th { background-color: #0f172a; color: #38bdf8; }
         tr:nth-child(even) { background-color: #1e293b; }
+        
         .status-select { padding: 6px; background-color: #0f172a; color: white; border: 1px solid #475569; border-radius: 4px; }
         .closing-box { width: 100%; padding: 6px; box-sizing: border-box; display: none; margin-top: 5px; background-color: #0f172a; color: white; border: 1px solid #f59e0b; border-radius: 4px; }
         .btn-update { background-color: #38bdf8; color: #0f172a; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         .btn-delete { background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+        
         .status-txt { font-weight: bold; padding: 3px 6px; border-radius: 4px; }
         .st-pending { background-color: #b45309; }
         .st-progress { background-color: #1d4ed8; }
@@ -25,9 +41,44 @@
 <body>
 
 <div class="container">
-    <h2>📊 IT Support - அட்மின் கட்டுப்பாட்டு அறை (Admin Control)</h2>
-    <p style="text-align: center; color: #94a3b8;">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த அனைத்து புகார்களின் விபரம்:</p>
+    <h2>📊 IT Support - அட்மின் கட்டுப்பாட்டு அறை & அறிக்கை (Admin Control)</h2>
     
+    <!-- CUSTOMIZABLE REPORT FILTER SECTION -->
+    <div class="report-filter-box">
+        <div class="filter-group">
+            <label for="filterMonth">மாதம் தேர்ந்தெடு (Select Month):</label>
+            <select id="filterMonth" class="filter-input" onchange="loadAdminDashboard()">
+                <option value="ALL">அனைத்து மாதங்கள் (All)</option>
+                <option value="01">ஜனவரி (January)</option>
+                <option value="02">பிப்ரவரி (February)</option>
+                <option value="03">மார்ச் (March)</option>
+                <option value="04">ஏப்ரல் (April)</option>
+                <option value="05">மே (May)</option>
+                <option value="06">ஜூன் (June)</option>
+                <option value="07">ஜூலை (July)</option>
+                <option value="08">ஆகஸ்ட் (August)</option>
+                <option value="09">செப்டம்பர் (September)</option>
+                <option value="10">அக்டோபர் (October)</option>
+                <option value="11">நவம்பர் (November)</option>
+                <option value="12">டிசம்பர் (December)</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filterYear">வருடம் தேர்ந்தெடு (Select Year):</label>
+            <select id="filterYear" class="filter-input" onchange="loadAdminDashboard()">
+                <option value="ALL">அனைத்து வருடங்கள் (All)</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+                <option value="2030">2030</option>
+            </select>
+        </div>
+
+        <button class="btn-pdf" onclick="generatePDFReport()">📄 PDF அறிக்கை பதிவிறக்கு (Download Report)</button>
+    </div>
+
     <div style="overflow-x:auto;">
         <table>
             <thead>
@@ -43,30 +94,73 @@
                 </tr>
             </thead>
             <tbody id="adminTableBody">
-                </tbody>
+                <!-- Data dynamically loads here -->
+            </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    window.onload = loadAdminDashboard;
+    window.onload = function() {
+        // Automatically set current month and year as default filter
+        const d = new Date();
+        const currentMonth = String(d.getMonth() + 1).padStart(2, '0');
+        const currentYear = String(d.getFullYear());
+        
+        document.getElementById('filterMonth').value = currentMonth;
+        document.getElementById('filterYear').value = currentYear;
+        
+        loadAdminDashboard();
+    };
+
+    // FILTERED DATABASE GETTER
+    function getFilteredData() {
+        let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
+        const selectedMonth = document.getElementById('filterMonth').value;
+        const selectedYear = document.getElementById('filterYear').value;
+
+        return localDB.filter(ticket => {
+            // Ticket date format assumed: DD/MM/YYYY or MM/DD/YYYY based on locale
+            // To be safe, we split by '/' and check matching elements
+            const dateParts = ticket.date.split('/'); 
+            if(dateParts.length < 3) return true; // fallback if date is weird
+
+            // Dynamic check for month and year position in string
+            let ticketMonth = dateParts[1].padStart(2, '0');
+            let ticketYear = dateParts[2];
+            
+            // In some locales toLocaleDateString gives M/D/YYYY, let's adjust if year is parts[2]
+            if(dateParts[0].length === 4) { // YYYY/MM/DD format
+                ticketYear = dateParts[0];
+                ticketMonth = dateParts[1].padStart(2, '0');
+            } else if (dateParts[2].length === 4) { // DD/MM/YYYY or MM/DD/YYYY
+                // Standard checking
+                ticketYear = dateParts[2];
+            }
+
+            const matchMonth = (selectedMonth === "ALL" || ticketMonth === selectedMonth);
+            const matchYear = (selectedYear === "ALL" || ticketYear === selectedYear);
+
+            return matchMonth && matchYear;
+        });
+    }
 
     function loadAdminDashboard() {
         const tbody = document.getElementById('adminTableBody');
         tbody.innerHTML = "";
-        let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
+        let filteredDB = getFilteredData();
 
-        if(localDB.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">புகார்கள் எதுவும் இதுவரை பதிவாகவில்லை!</td></tr>`;
+        if(filteredDB.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">தேர்ந்தெடுக்கப்பட்ட தேதியில் புகார்கள் எதுவும் இல்லை!</td></tr>`;
             return;
         }
 
-        localDB.forEach((ticket) => {
+        filteredDB.forEach((ticket) => {
             let stClass = 'st-pending';
             if(ticket.status.includes('Progress')) stClass = 'st-progress';
             if(ticket.status.includes('Closed')) stClass = 'st-closed';
 
-            let notesDisplay = ticket.adminClosingNotes ? `<br><small style="color:#f59e0b;"><b>குறிப்பு:</b> ${ticket.adminClosingNotes}</small>` : '';
+            let notesDisplay = ticket.adminClosingNotes ? `<br><small style="color:#f59e0b;"><b>பணி குறிப்பு:</b> ${ticket.adminClosingNotes}</small>` : '';
 
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -84,7 +178,7 @@
                         <option value="Resolved & Closed ✅">Resolved & Closed ✅</option>
                     </select>
                     
-                    <input type="text" id="desc_${ticket.id}" class="closing-box" placeholder="என்ன வேலை செய்தீர்கள்? (Description)">
+                    <input type="text" id="desc_${ticket.id}" class="closing-box" placeholder="என்ன வேலை செய்தீர்கள்?">
                     
                     <button class="btn-update" onclick="updateTicketStatus('${ticket.id}')">Update</button>
                     <button class="btn-delete" onclick="deleteTicket('${ticket.id}')">Delete</button>
@@ -97,7 +191,7 @@
     function checkStatusChange(ticketId, value) {
         const descBox = document.getElementById(`desc_${ticketId}`);
         if(value === "Resolved & Closed ✅") {
-            descBox.style.display = "block"; // Open description only when selecting Closed
+            descBox.style.display = "block";
             descBox.required = true;
         } else {
             descBox.style.display = "none";
@@ -106,11 +200,11 @@
     }
 
     function updateTicketStatus(ticketId) {
-        const selectVal = document.querySelector(`#desc_${ticketId}`).previousElementSibling.value;
+        const selectVal = document.getElementById(`desc_${ticketId}`).previousElementSibling.value;
         const closingDesc = document.getElementById(`desc_${ticketId}`).value;
 
         if(!selectVal) { alert('தயவுசெய்து ஏதேனும் நிலையைத் தேர்ந்தெடுக்கவும்!'); return; }
-        if(selectVal === "Resolved & Closed ✅" && !closingDesc.trim()) { alert('கம்ப்ளெய்ன்ட் க்ளோஸ் செய்யும்போது பணி விபரத்தை (Description) டைப் செய்யவும்!'); return; }
+        if(selectVal === "Resolved & Closed ✅" && !closingDesc.trim()) { alert('பணி விபரத்தை (Description) டைப் செய்யவும்!'); return; }
 
         let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
         const index = localDB.findIndex(t => t.id === ticketId);
@@ -133,6 +227,60 @@
             localStorage.setItem('eb_it_amc_db_split', JSON.stringify(localDB));
             loadAdminDashboard();
         }
+    }
+
+    // GENERATE JSPDFF AUTO-TABLE REPORT
+    function generatePDFReport() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'pt', 'a4'); // Landscape layout for wider table view
+        
+        let filteredData = getFilteredData();
+        if(filteredData.length === 0) { alert('பதிவிறக்க எந்த தரவும் இல்லை!'); return; }
+
+        const monthSel = document.getElementById('filterMonth').options[document.getElementById('filterMonth').selectedIndex].text;
+        const yearSel = document.getElementById('filterYear').value;
+
+        // Title Header
+        doc.setFontSize(18);
+        doc.setTextColor(30, 58, 138);
+        doc.text("TNEB IT Support & EB AMC Grievance Monthly Report", 40, 40);
+        
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Report Filter: Month: ${monthSel} | Year: ${yearSel}`, 40, 60);
+        doc.text(`Generated Date: ${new Date().toLocaleDateString()}`, 40, 75);
+
+        // Prep Table Rows Data
+        const tableRows = [];
+        filteredData.forEach(t => {
+            let closingNoteText = t.adminClosingNotes ? `\n[Notes: ${t.adminClosingNotes}]` : '';
+            const rowData = [
+                t.id,
+                `${t.employeeName}\n(${t.position})`,
+                t.sectionName,
+                t.faultyComponent,
+                t.description + closingNoteText,
+                t.date,
+                t.status
+            ];
+            tableRows.push(rowData);
+        });
+
+        // Generate Table
+        doc.autoTable({
+            startY: 95,
+            head: [['Ticket ID', 'Staff Name', 'Section', 'Component Fault', 'Problem Details / Action Taken', 'Date', 'Status']],
+            body: tableRows,
+            theme: 'grid',
+            headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255], fontStyle: 'bold' },
+            styles: { fontSize: 9, cellPadding: 8 },
+            columnStyles: {
+                4: { cellWidth: 200 }, // give wider column size for descriptions
+            }
+        });
+
+        // Save PDF File
+        doc.save(`IT_Support_Report_${monthSel}_${yearSel}.pdf`);
     }
 </script>
 </body>
