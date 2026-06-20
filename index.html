@@ -33,16 +33,19 @@
     <h2>💻 IT Support (தகவல் தொழில்நுட்ப ஆதரவு)</h2>
     <form id="grievanceForm" onsubmit="submitGrievance(); return false;">
         
+        <!-- Employee Name / ID -->
         <div class="form-group">
             <label for="employeeName">Employee Name / ID:<span class="required-star">*</span></label>
             <input type="text" id="employeeName" required placeholder="e.g., Surya">
         </div>
 
+        <!-- Section Name -->
         <div class="form-group">
             <label for="sectionName">Section Name (பிரிவு பெயர்):<span class="required-star">*</span></label>
             <input type="text" id="sectionName" required placeholder="e.g., North Section / Rural Office">
         </div>
 
+        <!-- Position / Designation -->
         <div class="form-group">
             <label for="employeePosition">Position (பதவி):<span class="required-star">*</span></label>
             <select id="employeePosition" required>
@@ -56,6 +59,7 @@
             </select>
         </div>
 
+        <!-- Select Faulty Component -->
         <div class="form-group">
             <label for="faultyComponent">Select Faulty Component:<span class="required-star">*</span></label>
             <select id="faultyComponent" required>
@@ -64,11 +68,12 @@
                 <option value="Network Problem / Connectivity">Network Problem (நெட்வொர்க் பிரச்சனை)</option>
                 <option value="Computer / Monitor Issue">Computer / Monitor Issue (கணினி பழுது)</option>
                 <option value="Mouse / Keyboard Not Working">Mouse / Keyboard Not Working</option>
-                <option value="Software / Bill App Issue">Software / Billing Application Issue</option>
-                <option value="Transformer / Power Issue">Transformer / EB Power Board Issue</option>
+                <option value="OS Problem">OS Problem</option>
+                <option value="Others">Others</option>
             </select>
         </div>
 
+        <!-- ELCB / RCCB Availability Status -->
         <div class="form-group">
             <label for="breakerStatus">ELCB / RCCB Installed? (பிரேக்கர் பொருத்தப்பட்டுள்ளதா?):<span class="required-star">*</span></label>
             <select id="breakerStatus" required onchange="togglePhotoUpload()">
@@ -78,13 +83,15 @@
             </select>
         </div>
 
+        <!-- Conditional Photo Upload -->
         <div class="form-group" id="photoSection">
             <label for="complaintPhoto">Upload ELCB/RCCB Photo Proof:<span class="required-star">*</span></label>
             <input type="file" id="complaintPhoto" accept="image/*">
         </div>
 
+        <!-- Earth Condition Status -->
         <div class="form-group">
-            <label for="earthCondition">Earth Condition in Office (அலுவலக எர்த் நிலை):<span class="required-star">*</span></label>
+            <label for="earthCondition">Earth Condition in Office (அلوவலக எர்த் நிலை):<span class="required-star">*</span></label>
             <select id="earthCondition" required>
                 <option value="">-- Select Earth Condition --</option>
                 <option value="Good Earth Connection">Good Condition (சரியான நிலையில் உள்ளது)</option>
@@ -93,6 +100,7 @@
             </select>
         </div>
 
+        <!-- Grievance Description -->
         <div class="form-group">
             <label for="complaintDetails">Grievance Description:<span class="required-star">*</span></label>
             <textarea id="complaintDetails" rows="4" required placeholder="Describe the problem..."></textarea>
@@ -124,7 +132,7 @@
         } else {
             photoSection.style.display = 'none';
             complaintPhoto.required = false;
-            complaintPhoto.value = ""; // Clear file choice if toggled off
+            complaintPhoto.value = "";
         }
     }
 
