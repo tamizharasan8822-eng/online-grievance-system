@@ -4,58 +4,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMC Complaint Report for Admin Panel</title>
-    <!-- PDF Libraries Included -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0f172a; margin: 0; padding: 20px; color: #e2e8f0; }
-        .container { background-color: #1e293b; padding: 30px; border-radius: 12px; max-width: 1200px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        h2 { text-align: center; color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; margin-bottom: 20px; font-family: 'Segoe UI', Arial, sans-serif; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .admin-box {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        h2 { text-align: center; color: #38bdf8; }
+        p.subtitle { text-align: center; color: #94a3b8; }
         
-        /* Filter Section Styles */
-        .report-filter-box { background-color: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #334155; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
-        .filter-group { display: flex; flex-direction: column; gap: 5px; }
-        .filter-group label { font-size: 13px; color: #94a3b8; font-weight: bold; }
-        .filter-input { padding: 10px; background-color: #1e293b; color: white; border: 1px solid #475569; border-radius: 6px; min-width: 150px; }
+        .filter-section {
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        select, button {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: white;
+            font-size: 14px;
+        }
+        .pdf-btn {
+            background-color: #10b981;
+            cursor: pointer;
+            font-weight: bold;
+            border: none;
+        }
         
-        .btn-pdf { background-color: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 40px; transition: background 0.2s; }
-        .btn-pdf:hover { background-color: #059669; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: #334155; font-size: 13px; }
-        th, td { border: 1px solid #475569; padding: 12px; text-align: left; }
-        th { background-color: #0f172a; color: #38bdf8; }
-        tr:nth-child(even) { background-color: #1e293b; }
-        
-        .status-select { padding: 6px; background-color: #0f172a; color: white; border: 1px solid #475569; border-radius: 4px; }
-        .closing-box { width: 100%; padding: 6px; box-sizing: border-box; display: none; margin-top: 5px; background-color: #0f172a; color: white; border: 1px solid #f59e0b; border-radius: 4px; }
-        .btn-update { background-color: #38bdf8; color: #0f172a; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .btn-delete { background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
-        
-        .status-txt { font-weight: bold; padding: 3px 6px; border-radius: 4px; }
-        .st-pending { background-color: #b45309; }
-        .st-progress { background-color: #1d4ed8; }
-        .st-closed { background-color: #15803d; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: #0f172a;
+        }
+        th, td {
+            border: 1px solid #334155;
+            padding: 12px;
+            text-align: left;
+        }
+        th { background-color: #1e293b; color: #38bdf8; }
+        .status-badge {
+            background: #f59e0b;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>📊 AMC Complaint Report for Admin Panel</h2>
-    <p style="text-align: center; color: #94a3b8;">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த அனைத்து புகார்களின் விபரம்:</p>
-    
-    <!-- CUSTOMIZABLE REPORT FILTER SECTION -->
-    <div class="report-filter-box">
-        <div class="filter-group">
-            <label for="filterMonth">மாதம் தேர்ந்தெடு (Select Month):</label>
-            <select id="filterMonth" class="filter-input" onchange="loadAdminDashboard()">
-                <option value="ALL">அனைத்து மாதங்கள் (All)</option>
+    <div class="admin-box">
+        <h2>📊 AMC Complaint Report for Admin Panel</h2>
+        <p class="subtitle">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த அனைத்து புகார்களின் விபரம்:</p>
+
+        <!-- ஃபில்டர் செக்ஷன் -->
+        <div class="filter-section">
+            <label>மாதம் தேர்ந்தெடு (Select Month):</label>
+            <select id="monthSelect" onchange="onFilterChange()">
+                <option value="All">எல்லா மாதமும் (All Months)</option>
                 <option value="01">ஜனவரி (January)</option>
                 <option value="02">பிப்ரவரி (February)</option>
                 <option value="03">மார்ச் (March)</option>
                 <option value="04">ஏப்ரல் (April)</option>
                 <option value="05">மே (May)</option>
-                <option value="06">ஜூன் (June)</option>
+                <option value="06" selected>ஜூன் (June)</option> <!-- ஜூன் default -->
                 <option value="07">ஜூலை (July)</option>
                 <option value="08">ஆகஸ்ட் (August)</option>
                 <option value="09">செப்டம்பர் (September)</option>
@@ -63,24 +92,18 @@
                 <option value="11">நவம்பர் (November)</option>
                 <option value="12">டிசம்பர் (December)</option>
             </select>
-        </div>
 
-        <div class="filter-group">
-            <label for="filterYear">வருடம் தேர்ந்தெடு (Select Year):</label>
-            <select id="filterYear" class="filter-input" onchange="loadAdminDashboard()">
-                <option value="ALL">அனைத்து வருடங்கள் (All)</option>
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-                <option value="2028">2028</option>
-                <option value="2029">2029</option>
-                <option value="2030">2030</option>
+            <label>வருடம் தேர்ந்தெடு (Select Year):</label>
+            <select id="yearSelect" onchange="onFilterChange()">
+                <option value="All">எல்லா வருடமும் (All Years)</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
             </select>
+
+            <button class="pdf-btn">📄 PDF அறிக்கை பதிவிறக்கு (Download Report)</button>
         </div>
 
-        <button class="btn-pdf" onclick="generatePDFReport()">📄 PDF அறிக்கை பதிவிறக்கு (Download Report)</button>
-    </div>
-
-    <div style="overflow-x:auto;">
+        <!-- கம்ப்ளெய்ன்ட் டேபிள் -->
         <table>
             <thead>
                 <tr>
@@ -94,181 +117,83 @@
                     <th>செயல்பாடுகள் (Actions)</th>
                 </tr>
             </thead>
-            <tbody id="adminTableBody">
-                <!-- Data dynamically loads here -->
+            <tbody id="complaintTableBody">
+                <!-- டேட்டா இங்கே லோடு ஆகும் -->
             </tbody>
         </table>
     </div>
-</div>
 
-<script>
-    window.onload = function() {
-        const d = new Date();
-        const currentMonth = String(d.getMonth() + 1).padStart(2, '0');
-        const currentYear = String(d.getFullYear());
-        
-        document.getElementById('filterMonth').value = currentMonth;
-        document.getElementById('filterYear').value = currentYear;
-        
-        loadAdminDashboard();
-    };
+    <!-- ஜாவாஸ்கிரிப்ட் ஸ்மார்ட் கோடு -->
+    <script>
+        // மெயின் டிஸ்பிளே ஃபங்க்ஷன்
+        function displayComplaints(filterMonth = "All", filterYear = "All") {
+            // லோக்கல் ஸ்டோரேஜில் இருந்து டேட்டாவை எடுத்தல் (உங்க பழைய கீ பெயரை இங்க போடுங்க)
+            const complaints = JSON.parse(localStorage.getItem('complaints')) || [];
+            const tableBody = document.getElementById('complaintTableBody');
+            tableBody.innerHTML = '';
 
-    function getFilteredData() {
-        let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
-        const selectedMonth = document.getElementById('filterMonth').value;
-        const selectedYear = document.getElementById('filterYear').value;
+            // ஸ்மார்ட் ஃபில்டர் கண்டிஷன்
+            const filteredData = complaints.filter(ticket => {
+                if (!ticket.date) return false;
+                
+                // தேதியை பிரிக்கிறோம் (Format: DD/MM/YYYY)
+                const dateParts = ticket.date.split('/'); 
+                const ticketMonth = dateParts[1]; // MM
+                const ticketYear = dateParts[2];  // YYYY
 
-        return localDB.filter(ticket => {
-            const dateParts = ticket.date.split('/'); 
-            if(dateParts.length < 3) return true;
+                // "All" என்று இருந்தால் எல்லா புகார்களையும் காட்டும்
+                if (filterMonth === "All" && filterYear === "All") {
+                    return true;
+                }
+                if (filterMonth !== "All" && filterYear === "All") {
+                    return ticketMonth === filterMonth;
+                }
+                if (filterMonth === "All" && filterYear !== "All") {
+                    return ticketYear === filterYear;
+                }
 
-            let ticketMonth = dateParts[1].padStart(2, '0');
-            let ticketYear = dateParts[2];
+                // இரண்டும் மேட்ச் ஆனா மட்டும் காட்டும்
+                return ticketMonth === filterMonth && ticketYear === filterYear;
+            });
+
+            // புகார்கள் இல்லை என்றால் காட்டும் மெசேஜ்
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #f43f5e; padding: 20px;">தேர்ந்தெடுக்கப்பட்ட தேதியில் புகார்கள் எதுவும் இல்லை!</td></tr>`;
+                return;
+            }
+
+            // டேபிளில் டேட்டாவை ஒன்-பை-ஒன் காட்டுதல்
+            filteredData.forEach(ticket => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td><b>${ticket.id || 'N/A'}</b></td>
+                        <td>${ticket.employeeName || 'N/A'}</td>
+                        <td>${ticket.sectionName || 'N/A'}</td>
+                        <td>${ticket.faultyComponent || 'N/A'}</td>
+                        <td>${ticket.description || 'N/A'}</td>
+                        <td>${ticket.date || 'N/A'}</td>
+                        <td><span class="status-badge">${ticket.status || 'Pending ⏳'}</span></td>
+                        <td><button style="cursor:pointer; background:#3b82f6; border:none; padding:5px 10px; border-radius:4px; color:white;">Update</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // டிராப்டவுன் மாறும்போது வேலை செய்யும்
+        function onFilterChange() {
+            const selectedMonth = document.getElementById('monthSelect').value;
+            const selectedYear = document.getElementById('yearSelect').value;
+            displayComplaints(selectedMonth, selectedYear);
+        }
+
+        // 🚀 பேஜ் ஓபன் ஆன உடனே "எல்லா புகார்களையும்" (All) காட்ட செட் பண்றோம்!
+        window.onload = function() {
+            displayComplaints("All", "All"); 
             
-            if(dateParts[0].length === 4) {
-                ticketYear = dateParts[0];
-                ticketMonth = dateParts[1].padStart(2, '0');
-            }
-
-            const matchMonth = (selectedMonth === "ALL" || ticketMonth === selectedMonth);
-            const matchYear = (selectedYear === "ALL" || ticketYear === selectedYear);
-
-            return matchMonth && matchYear;
-        });
-    }
-
-    function loadAdminDashboard() {
-        const tbody = document.getElementById('adminTableBody');
-        tbody.innerHTML = "";
-        let filteredDB = getFilteredData();
-
-        if(filteredDB.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">தேர்ந்தெடுக்கப்பட்ட தேதியில் புகார்கள் எதுவும் இல்லை!</td></tr>`;
-            return;
-        }
-
-        filteredDB.forEach((ticket) => {
-            let stClass = 'st-pending';
-            if(ticket.status.includes('Progress')) stClass = 'st-progress';
-            if(ticket.status.includes('Closed')) stClass = 'st-closed';
-
-            let notesDisplay = ticket.adminClosingNotes ? `<br><small style="color:#f59e0b;"><b>பணி குறிப்பு:</b> ${ticket.adminClosingNotes}</small>` : '';
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><b>${ticket.id}</b></td>
-                <td>${ticket.employeeName}<br><small style="color:#94a3b8;">${ticket.position}</small></td>
-                <td>${ticket.sectionName}</td>
-                <td><b style="color:#38bdf8;">${ticket.faultyComponent}</b></td>
-                <td>${ticket.description}${notesDisplay}</td>
-                <td>${ticket.date}</td>
-                <td><span class="status-txt ${stClass}">${ticket.status}</span></td>
-                <td>
-                    <select class="status-select" onchange="checkStatusChange('${ticket.id}', this.value)">
-                        <option value="">-- நிலை மாற்று --</option>
-                        <option value="In Progress 🛠">In Progress 🛠</option>
-                        <option value="Resolved & Closed ✅">Resolved & Closed ✅</option>
-                    </select>
-                    
-                    <input type="text" id="desc_${ticket.id}" class="closing-box" placeholder="என்ன வேலை செய்தீர்கள்?">
-                    
-                    <button class="btn-update" onclick="updateTicketStatus('${ticket.id}')">Update</button>
-                    <button class="btn-delete" onclick="deleteTicket('${ticket.id}')">Delete</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    function checkStatusChange(ticketId, value) {
-        const descBox = document.getElementById(`desc_${ticketId}`);
-        if(value === "Resolved & Closed ✅") {
-            descBox.style.display = "block";
-            descBox.required = true;
-        } else {
-            descBox.style.display = "none";
-            descBox.required = false;
-        }
-    }
-
-    function updateTicketStatus(ticketId) {
-        const selectVal = document.getElementById(`desc_${ticketId}`).previousElementSibling.value;
-        const closingDesc = document.getElementById(`desc_${ticketId}`).value;
-
-        if(!selectVal) { alert('தயவுசெய்து ஏதேனும் நிலையைத் தேர்ந்தெடுக்கவும்!'); return; }
-        if(selectVal === "Resolved & Closed ✅" && !closingDesc.trim()) { alert('பணி விபரத்தை (Description) டைப் செய்யவும்!'); return; }
-
-        let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
-        const index = localDB.findIndex(t => t.id === ticketId);
-
-        if(index !== -1) {
-            localDB[index].status = selectVal;
-            if(selectVal === "Resolved & Closed ✅") {
-                localDB[index].adminClosingNotes = closingDesc;
-            }
-            localStorage.setItem('eb_it_amc_db_split', JSON.stringify(localDB));
-            alert('நிலை வெற்றிகரமாக மாற்றப்பட்டது!');
-            loadAdminDashboard();
-        }
-    }
-
-    function deleteTicket(ticketId) {
-        if(confirm(`ID: ${ticketId} புகாரை நீக்கலாமா?`)) {
-            let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
-            localDB = localDB.filter(t => t.id !== ticketId);
-            localStorage.setItem('eb_it_amc_db_split', JSON.stringify(localDB));
-            loadAdminDashboard();
-        }
-    }
-
-    function generatePDFReport() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'pt', 'a4');
-        
-        let filteredData = getFilteredData();
-        if(filteredData.length === 0) { alert('பதிவிறக்க எந்த தரவும் இல்லை!'); return; }
-
-        const monthSel = document.getElementById('filterMonth').options[document.getElementById('filterMonth').selectedIndex].text;
-        const yearSel = document.getElementById('filterYear').value;
-
-        doc.setFontSize(18);
-        doc.setTextColor(30, 58, 138);
-        doc.text("AMC Complaint Report for Admin Panel", 40, 40);
-        
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Report Filter: Month: ${monthSel} | Year: ${yearSel}`, 40, 60);
-        doc.text(`Generated Date: ${new Date().toLocaleDateString()}`, 40, 75);
-
-        const tableRows = [];
-        filteredData.forEach(t => {
-            let closingNoteText = t.adminClosingNotes ? `\n[Notes: ${t.adminClosingNotes}]` : '';
-            const rowData = [
-                t.id,
-                `${t.employeeName}\n(${t.position})`,
-                t.sectionName,
-                t.faultyComponent,
-                t.description + closingNoteText,
-                t.date,
-                t.status
-            ];
-            tableRows.push(rowData);
-        });
-
-        doc.autoTable({
-            startY: 95,
-            head: [['Ticket ID', 'Staff Name', 'Section', 'Component Fault', 'Problem Details / Action Taken', 'Date', 'Status']],
-            body: tableRows,
-            theme: 'grid',
-            headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255], fontStyle: 'bold' },
-            styles: { fontSize: 9, cellPadding: 8 },
-            columnStyles: {
-                4: { cellWidth: 200 },
-            }
-        });
-
-        doc.save(`AMC_Complaint_Report_${monthSel}_${yearSel}.pdf`);
-    }
-</script>
+            // டிராப்டவுன் செலக்ட் பாக்ஸை "எல்லா மாதமும்" என்று மாற்றி வைக்கிறோம்
+            document.getElementById('monthSelect').value = "All";
+            document.getElementById('yearSelect').value = "All";
+        };
+    </script>
 </body>
 </html>
