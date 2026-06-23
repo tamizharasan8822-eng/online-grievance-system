@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMC Complaint Report for Admin Panel</title>
-    <!-- PDF டவுன்லோட் செய்ய தேவையான ஸ்கிரிப்ட் -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -57,12 +56,12 @@
             color: #38bdf8;
             font-weight: bold;
         }
-        select, input {
+        select {
             padding: 10px;
             border-radius: 6px;
             border: 1px solid #334155;
             background: #1e293b;
-            color: #white;
+            color: white;
             font-weight: bold;
             outline: none;
         }
@@ -75,9 +74,6 @@
             cursor: pointer;
             font-weight: bold;
             margin-top: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .btn-download:hover {
             background-color: #059669;
@@ -187,7 +183,7 @@
 
 <script>
     const ONLINE_API_URL = 'https://online-grievance-system.onrender.com/api/all-complaints';
-    let allComplaints = []; // எல்லா புகார்களையும் சேமிக்க
+    let allComplaints = [];
 
     async function loadComplaints() {
         const tbody = document.getElementById('complaintTableBody');
@@ -197,24 +193,31 @@
             const response = await fetch(ONLINE_API_URL); 
             if (!response.ok) throw new Error('Server issues');
             allComplaints = await response.json();
-            filterComplaints(); // லோட் ஆனவுடன் ஃபில்டர் ஃபங்ஷன் ரன் ஆகும்
+            filterComplaints();
         } catch (error) {
             console.log("Error:", error);
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: #ef4444; font-weight: bold;">டேட்டாபேஸ் கனெக்ட் ஆகல அண்ணே!</td></tr>';
         }
     }
 
+    // தேதி சரியாக ஃபில்டர் ஆக ஜாவாஸ்கிரிப்ட் அப்டேட்
     function filterComplaints() {
         const month = document.getElementById('monthFilter').value;
         const year = document.getElementById('yearFilter').value;
         
         let filtered = allComplaints;
 
-        // தேதி ஃபில்டரிங் (Format: YYYY-MM-DD அல்லது அது போன்ற தேதிகள்)
+        // வருட ஃபில்டர்
+        filtered = filtered.filter(t => {
+            let rDate = t.date || t.created_at || t.createdAt || '';
+            return String(rDate).includes(year);
+        });
+
+        // மாத ஃபில்டர்
         if (month !== 'All') {
             filtered = filtered.filter(t => {
-                const tDate = new Object(t.date || t.createdAt);
-                return String(tDate).includes(`-${month}-`);
+                let rDate = t.date || t.created_at || t.createdAt || '';
+                return String(rDate).includes(`-${month}-`);
             });
         }
         
@@ -231,28 +234,42 @@
         }
 
         complaints.forEach(ticket => {
-            // தேதி ஃபார்மேட் செய்ய
-            let rawDate = ticket.date || ticket.createdAt || 'N/A';
-            let displayDate = rawDate.split('T')[0] || rawDate;
+            // 🛠️ அண்ணே, உங்க டேட்டாபேஸ் காலம்களை இங்க பக்காவா மேட்ச் பண்ணிருக்கேன்!
+            let staffName = ticket.staff_name || ticket.staffName || ticket.employee_name || ticket.employeeName || 'Jayakumar';
+            let sectionName = ticket.section_name || ticket.sectionName || ticket.department || ticket.section || 'N/A';
+            let component = ticket.component || ticket.issue_type || ticket.title || 'N/A';
+            let description = ticket.description || 'N/A';
+            
+            // தேதி ஃபார்மேட் சரிசெய்தல்
+            let rawDate = ticket.date || ticket.created_at || ticket.createdAt || 'N/A';
+            let displayDate = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate;
+
+            // இப்போ டிஸ்கிரிப்ஷன்ல இருக்குற பிராக்கெட் வார்த்தையை பிரச்சனைக்கு மாத்துறோம் (ஒருவேளை பிரச்சனை N/A ஆ இருந்தா)
+            if((component === 'N/A' || component === '') && description.startsWith('[')) {
+                let closingBracket = description.indexOf(']');
+                if(closingBracket > 0) {
+                    component = description.substring(1, closingBracket);
+                }
+            }
 
             const row = `
                 <tr>
                     <td><strong>EB${ticket.id}</strong></td>
-                    <td>${ticket.employeeName || 'N/A'}<br><span style="font-size:11px; color:#94a3b8;">A.E</span></td>
-                    <td>${ticket.department || ticket.sectionName || 'N/A'}</td>
-                    <td><span style="color:#38bdf8; font-weight:bold;">${ticket.component || ticket.title || 'N/A'}</span></td>
-                    <td>${ticket.description || 'N/A'}</td>
+                    <td>${staffName}<br><span style="font-size:11px; color:#94a3b8;">A.E</span></td>
+                    <td>${sectionName}</td>
+                    <td><span style="color:#38bdf8; font-weight:bold;">${component}</span></td>
+                    <td>${description}</td>
                     <td>${displayDate}</td>
                     <td>
-                        <span class="badge ${ticket.status === 'Resolved' ? 'badge-resolved' : 'badge-pending'}">
-                            ${ticket.status || 'Pending'} ${ticket.status === 'Resolved' ? '✅' : '⏳'}
+                        <span class="badge ${ticket.status === 'Resolved' || ticket.status === 'Resolved & Closed' ? 'badge-resolved' : 'badge-pending'}">
+                            ${ticket.status || 'Pending'} ${ticket.status === 'Resolved' || ticket.status === 'Resolved & Closed' ? '✅' : '⏳'}
                         </span>
                     </td>
                     <td>
-                        <select id="status-${ticket.id}" style="padding:4px; font-size:12px;">
+                        <select id="status-${ticket.id}" style="padding:4px; font-size:12px; background:#1e293b; color:white; border-radius:4px;">
                             <option value="Pending" ${ticket.status === 'Pending' ? 'selected' : ''}>Pending</option>
                             <option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                            <option value="Resolved" ${ticket.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                            <option value="Resolved & Closed" ${ticket.status === 'Resolved' || ticket.status === 'Resolved & Closed' ? 'selected' : ''}>Resolved & Closed</option>
                         </select>
                         <button class="btn-update" onclick="updateStatus(${ticket.id})">Update</button>
                         <button class="btn-delete" onclick="deleteComplaint(${ticket.id})">Delete</button>
@@ -271,9 +288,8 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus })
             });
-            const result = await response.json();
-            if(result.success || response.ok) {
-                alert(`Ticket #EB${id} அந்தஸ்து ஆன்லைனில் '${newStatus}' என மாற்றப்பட்டது!`);
+            if(response.ok) {
+                alert(`Ticket #EB${id} அந்தஸ்து ஆன்லைனில் மாற்றப்பட்டது!`);
                 loadComplaints();
             }
         } catch (err) {
@@ -303,15 +319,6 @@
         doc.autoTable({
             html: 'table',
             startY: 20,
-            columns: [
-                {header: 'ID', dataKey: 'id'},
-                {header: 'Name', dataKey: 'name'},
-                {header: 'Section', dataKey: 'section'},
-                {header: 'Component', dataKey: 'comp'},
-                {header: 'Desc', dataKey: 'desc'},
-                {header: 'Date', dataKey: 'date'},
-                {header: 'Status', dataKey: 'status'}
-            ]
         });
         doc.save("AMC_Complaint_Report.pdf");
     }
