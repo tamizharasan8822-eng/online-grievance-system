@@ -3,272 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC Complaint Report for Admin Panel</title>
-    <!-- PDF Libraries Included -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    
+    <title>IT Support - Admin Portal (Online Cloud)</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0f172a; margin: 0; padding: 20px; color: #e2e8f0; }
-        .container { background-color: #1e293b; padding: 30px; border-radius: 12px; max-width: 1200px; margin: 0 auto; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        h2 { text-align: center; color: #38bdf8; border-bottom: 2px solid #38bdf8; padding-bottom: 10px; margin-bottom: 20px; font-family: 'Segoe UI', Arial, sans-serif; }
-        
-        /* Filter Section Styles */
-        .report-filter-box { background-color: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #334155; display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
-        .filter-group { display: flex; flex-direction: column; gap: 5px; }
-        .filter-group label { font-size: 13px; color: #94a3b8; font-weight: bold; }
-        .filter-input { padding: 10px; background-color: #1e293b; color: white; border: 1px solid #475569; border-radius: 6px; min-width: 150px; }
-        
-        .btn-pdf { background-color: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; height: 40px; transition: background 0.2s; }
-        .btn-pdf:hover { background-color: #059669; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: #334155; font-size: 13px; }
-        th, td { border: 1px solid #475569; padding: 12px; text-align: left; }
-        th { background-color: #0f172a; color: #38bdf8; }
-        tr:nth-child(even) { background-color: #1e293b; }
-        
-        .status-select { padding: 6px; background-color: #0f172a; color: white; border: 1px solid #475569; border-radius: 4px; }
-        .closing-box { width: 100%; padding: 6px; box-sizing: border-box; display: none; margin-top: 5px; background-color: #0f172a; color: white; border: 1px solid #f59e0b; border-radius: 4px; }
-        .btn-update { background-color: #38bdf8; color: #0f172a; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .btn-delete { background-color: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
-        
-        .status-txt { font-weight: bold; padding: 3px 6px; border-radius: 4px; }
-        .st-pending { background-color: #b45309; }
-        .st-progress { background-color: #1d4ed8; }
-        .st-closed { background-color: #15803d; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #1e3a8a;
+            text-align: center;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 15px;
+        }
+        .badge-online {
+            background-color: #10b981;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            float: right;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background-color: #1e3a8a;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        .status-select {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+            font-weight: bold;
+        }
+        .btn-refresh {
+            background-color: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-refresh:hover {
+            background-color: #172554;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📊 AMC Complaint Report for Admin Panel</h2>
-    <p style="text-align: center; color: #94a3b8;">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த அனைத்து புகார்களின் விபரம்:</p>
+    <span class="badge-online">ONLINE CLOUD MODE</span>
+    <h2>👨‍💻 Admin Control Panel (அட்மின் போர்ட்டல்)</h2>
     
-    <!-- CUSTOMIZABLE REPORT FILTER SECTION -->
-    <div class="report-filter-box">
-        <div class="filter-group">
-            <label for="filterMonth">மாதம் தேர்ந்தெடு (Select Month):</label>
-            <select id="filterMonth" class="filter-input" onchange="loadAdminDashboard()">
-                <option value="ALL">அனைத்து மாதங்கள் (All)</option>
-                <option value="01">ஜனவரி (January)</option>
-                <option value="02">பிப்ரவரி (February)</option>
-                <option value="03">மார்ச் (March)</option>
-                <option value="04">ஏப்ரல் (April)</option>
-                <option value="05">மே (May)</option>
-                <option value="06">ஜூன் (June)</option>
-                <option value="07">ஜூலை (July)</option>
-                <option value="08">ஆகஸ்ட் (August)</option>
-                <option value="09">செப்டம்பர் (September)</option>
-                <option value="10">அக்டோபர் (October)</option>
-                <option value="11">நவம்பர் (November)</option>
-                <option value="12">டிசம்பர் (December)</option>
-            </select>
-        </div>
+    <button class="btn-refresh" onclick="loadComplaints()">🔄 Refresh Complaints</button>
 
-        <div class="filter-group">
-            <label for="filterYear">வருடம் தேர்ந்தெடு (Select Year):</label>
-            <select id="filterYear" class="filter-input" onchange="loadAdminDashboard()">
-                <option value="ALL">அனைத்து வருடங்கள் (All)</option>
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-                <option value="2028">2028</option>
-                <option value="2029">2029</option>
-                <option value="2030">2030</option>
-            </select>
-        </div>
-
-        <button class="btn-pdf" onclick="generatePDFReport()">📄 PDF அறிக்கை பதிவிறக்கு (Download Report)</button>
-    </div>
-
-    <div style="overflow-x:auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>புகார் ID</th>
-                    <th>ஸ்டாஃப் விபரம்</th>
-                    <th>பிரிவு பெயர்</th>
-                    <th>பிரச்சனை (Component)</th>
-                    <th>விபரம் (Description)</th>
-                    <th>தேதி</th>
-                    <th>தற்போதைய நிலை</th>
-                    <th>செயல்பாடுகள் (Actions)</th>
-                </tr>
-            </thead>
-            <tbody id="adminTableBody">
-                <!-- Data dynamically loads here -->
+    <table>
+        <thead>
+            <tr>
+                <th>Ticket ID</th>
+                <th>Employee Name</th>
+                <th>Grievance Details</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="complaintTableBody">
             </tbody>
-        </table>
-    </div>
+    </table>
 </div>
 
 <script>
-    window.onload = function() {
-        const d = new Date();
-        const currentMonth = String(d.getMonth() + 1).padStart(2, '0');
-        const currentYear = String(d.getFullYear());
+    // அண்ணே, இப்போ உங்க Render ஆன்லைன் கிளவுட் சர்வர் லிங்க்கை இங்க செட் பண்ணிட்டேன்! 🚀
+    const ONLINE_API_URL = 'https://online-grievance-system.onrender.com/api/all-complaints';
+
+    async function loadComplaints() {
+        const tbody = document.getElementById('complaintTableBody');
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading from Aiven cloud database...</td></tr>';
         
-        document.getElementById('filterMonth').value = currentMonth;
-        document.getElementById('filterYear').value = currentYear;
-        
-        loadAdminDashboard();
-    };
-
-    function getFilteredData() {
-        let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
-        const selectedMonth = document.getElementById('filterMonth').value;
-        const selectedYear = document.getElementById('filterYear').value;
-
-        return localDB.filter(ticket => {
-            const dateParts = ticket.date.split('/'); 
-            if(dateParts.length < 3) return true;
-
-            let ticketMonth = dateParts[1].padStart(2, '0');
-            let ticketYear = dateParts[2];
-            
-            if(dateParts[0].length === 4) {
-                ticketYear = dateParts[0];
-                ticketMonth = dateParts[1].padStart(2, '0');
-            }
-
-            const matchMonth = (selectedMonth === "ALL" || ticketMonth === selectedMonth);
-            const matchYear = (selectedYear === "ALL" || ticketYear === selectedYear);
-
-            return matchMonth && matchYear;
-        });
+        try {
+            // ஆன்லைன் Render பேக்-எண்ட் மூலமா Aiven கிளவுட் MySQL டேட்டாவை எடுக்கிறோம்
+            const response = await fetch(ONLINE_API_URL); 
+            if (!response.ok) throw new Error('Server issues');
+            const complaints = await response.json();
+            displayData(complaints);
+        } catch (error) {
+            console.log("Error loading cloud database:", error);
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: #ef4444; font-weight: bold;">அண்ணே! உங்க ஆன்லைன் Render சர்வர்ல ஏதோ பிரச்சனை அல்லது டேட்டாபேஸ் கனெக்ட் ஆகல!</td></tr>';
+        }
     }
 
-    function loadAdminDashboard() {
-        const tbody = document.getElementById('adminTableBody');
-        tbody.innerHTML = "";
-        let filteredDB = getFilteredData();
+    function displayData(complaints) {
+        const tbody = document.getElementById('complaintTableBody');
+        tbody.innerHTML = '';
 
-        if(filteredDB.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">தேர்ந்தெடுக்கப்பட்ட தேதியில் புகார்கள் எதுவும் இல்லை!</td></tr>`;
+        if(complaints.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; font-weight: bold; color: #f59e0b;">டேட்டாபேஸில் புகார்கள் எதுவும் இல்லை அண்ணே! புது புகார் போட்டு செக் பண்ணுங்க!</td></tr>';
             return;
         }
 
-        filteredDB.forEach((ticket) => {
-            let stClass = 'st-pending';
-            if(ticket.status.includes('Progress')) stClass = 'st-progress';
-            if(ticket.status.includes('Closed')) stClass = 'st-closed';
-
-            let notesDisplay = ticket.adminClosingNotes ? `<br><small style="color:#f59e0b;"><b>பணி குறிப்பு:</b> ${ticket.adminClosingNotes}</small>` : '';
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><b>${ticket.id}</b></td>
-                <td>${ticket.employeeName}<br><small style="color:#94a3b8;">${ticket.position}</small></td>
-                <td>${ticket.sectionName}</td>
-                <td><b style="color:#38bdf8;">${ticket.faultyComponent}</b></td>
-                <td>${ticket.description}${notesDisplay}</td>
-                <td>${ticket.date}</td>
-                <td><span class="status-txt ${stClass}">${ticket.status}</span></td>
-                <td>
-                    <select class="status-select" onchange="checkStatusChange('${ticket.id}', this.value)">
-                        <option value="">-- நிலை மாற்று --</option>
-                        <option value="In Progress 🛠">In Progress 🛠</option>
-                        <option value="Resolved & Closed ✅">Resolved & Closed ✅</option>
-                    </select>
-                    
-                    <input type="text" id="desc_${ticket.id}" class="closing-box" placeholder="என்ன வேலை செய்தீர்கள்?">
-                    
-                    <button class="btn-update" onclick="updateTicketStatus('${ticket.id}')">Update</button>
-                    <button class="btn-delete" onclick="deleteTicket('${ticket.id}')">Delete</button>
-                </td>
+        // ஆன்லைன் கிளவுட்ல இருக்குற எல்லா புகார்களையும் வரிசையாகக் காட்டும்
+        complaints.forEach(ticket => {
+            const row = `
+                <tr>
+                    <td><strong>#${ticket.id}</strong></td>
+                    <td>${ticket.title || ticket.employeeName || 'N/A'}</td>
+                    <td>${ticket.description || 'N/A'}</td>
+                    <td><span style="color: ${ticket.status === 'Pending' ? '#ef4444' : ticket.status === 'In Progress' ? '#f59e0b' : '#10b981'}; font-weight:bold;">${ticket.status || 'Pending'}</span></td>
+                    <td>
+                        <select class="status-select" onchange="updateStatus(${ticket.id}, this.value)">
+                            <option value="Pending" ${ticket.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="Resolved" ${ticket.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                        </select>
+                    </td>
+                </tr>
             `;
-            tbody.appendChild(row);
+            tbody.innerHTML += row;
         });
     }
 
-    function checkStatusChange(ticketId, value) {
-        const descBox = document.getElementById(`desc_${ticketId}`);
-        if(value === "Resolved & Closed ✅") {
-            descBox.style.display = "block";
-            descBox.required = true;
-        } else {
-            descBox.style.display = "none";
-            descBox.required = false;
-        }
-    }
-
-    function updateTicketStatus(ticketId) {
-        const selectVal = document.getElementById(`desc_${ticketId}`).previousElementSibling.value;
-        const closingDesc = document.getElementById(`desc_${ticketId}`).value;
-
-        if(!selectVal) { alert('தயவுசெய்து ஏதேனும் நிலையைத் தேர்ந்தெடுக்கவும்!'); return; }
-        if(selectVal === "Resolved & Closed ✅" && !closingDesc.trim()) { alert('பணி விபரத்தை (Description) டைப் செய்யவும்!'); return; }
-
-        let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
-        const index = localDB.findIndex(t => t.id === ticketId);
-
-        if(index !== -1) {
-            localDB[index].status = selectVal;
-            if(selectVal === "Resolved & Closed ✅") {
-                localDB[index].adminClosingNotes = closingDesc;
+    async function updateStatus(id, newStatus) {
+        try {
+            // ஸ்டேட்டஸ் அப்டேட்டும் ஆன்லைன் சர்வருக்கே போகும்
+            const response = await fetch(`https://online-grievance-system.onrender.com/api/complaint/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            const result = await response.json();
+            if(result.success) {
+                alert(`Ticket #${id} அந்தஸ்து ஆன்லைனில் '${newStatus}' என வெற்றிகரமாக மாற்றப்பட்டது!`);
+                loadComplaints();
             }
-            localStorage.setItem('eb_it_amc_db_split', JSON.stringify(localDB));
-            alert('நிலை வெற்றிகரமாக மாற்றப்பட்டது!');
-            loadAdminDashboard();
+        } catch (err) {
+            alert(`ஆன்லைன் டேட்டாபேஸ் உடன் இணைக்க முடியவில்லை அண்ணே!`);
         }
     }
 
-    function deleteTicket(ticketId) {
-        if(confirm(`ID: ${ticketId} புகாரை நீக்கலாமா?`)) {
-            let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
-            localDB = localDB.filter(t => t.id !== ticketId);
-            localStorage.setItem('eb_it_amc_db_split', JSON.stringify(localDB));
-            loadAdminDashboard();
-        }
-    }
-
-    function generatePDFReport() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'pt', 'a4');
-        
-        let filteredData = getFilteredData();
-        if(filteredData.length === 0) { alert('பதிவிறக்க எந்த தரவும் இல்லை!'); return; }
-
-        const monthSel = document.getElementById('filterMonth').options[document.getElementById('filterMonth').selectedIndex].text;
-        const yearSel = document.getElementById('filterYear').value;
-
-        doc.setFontSize(18);
-        doc.setTextColor(30, 58, 138);
-        doc.text("AMC Complaint Report for Admin Panel", 40, 40);
-        
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Report Filter: Month: ${monthSel} | Year: ${yearSel}`, 40, 60);
-        doc.text(`Generated Date: ${new Date().toLocaleDateString()}`, 40, 75);
-
-        const tableRows = [];
-        filteredData.forEach(t => {
-            let closingNoteText = t.adminClosingNotes ? `\n[Notes: ${t.adminClosingNotes}]` : '';
-            const rowData = [
-                t.id,
-                `${t.employeeName}\n(${t.position})`,
-                t.sectionName,
-                t.faultyComponent,
-                t.description + closingNoteText,
-                t.date,
-                t.status
-            ];
-            tableRows.push(rowData);
-        });
-
-        doc.autoTable({
-            startY: 95,
-            head: [['Ticket ID', 'Staff Name', 'Section', 'Component Fault', 'Problem Details / Action Taken', 'Date', 'Status']],
-            body: tableRows,
-            theme: 'grid',
-            headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255], fontStyle: 'bold' },
-            styles: { fontSize: 9, cellPadding: 8 },
-            columnStyles: {
-                4: { cellWidth: 200 },
-            }
-        });
-
-        doc.save(`AMC_Complaint_Report_${monthSel}_${yearSel}.pdf`);
-    }
+    window.onload = loadComplaints;
 </script>
+
 </body>
 </html>
