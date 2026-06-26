@@ -109,7 +109,7 @@
             <textarea id="complaintDetails" rows="4" required placeholder="Describe the problem..."></textarea>
         </div>
 
-        <button type="submit">Submit Ticket to IT Team</button>
+        <button type="submit" id="submitBtn">Submit Ticket to IT Team</button>
     </form>
 
     <hr style="margin-top: 30px; border: 0; border-top: 2px dashed #bdc3c7;">
@@ -123,7 +123,9 @@
     <div id="trackResult" class="alert"></div>
 </div>
 
-<script {nonce_script}>
+<script>
+    const API_BASE_URL = 'https://online-grievance-system.onrender.com/api';
+
     function togglePhotoUpload() {
         const breakerStatus = document.getElementById('breakerStatus').value;
         const photoSection = document.getElementById('photoSection');
@@ -132,60 +134,100 @@
         else { photoSection.style.display = 'none'; complaintPhoto.required = false; complaintPhoto.value = ""; }
     }
 
-    function submitGrievance() {
-        const generatedId = "EB" + Math.floor(100000 + Math.random() * 900000);
+    // 🚀 இங்கதான் அண்ணே ஆன்லைன் சர்வர்ல டேட்டாவை கொண்டு போய் போஸ்ட் (POST) பண்றோம்!
+    async function submitGrievance() {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.innerText = "Submitting to Server...";
+        submitBtn.disabled = true;
+
+        // ID எண்ணாக மட்டுமே டேட்டாபேஸ்க்குப் போக வேண்டும் (உதாரணமாக 293082)
+        const numericId = Math.floor(100000 + Math.random() * 900000);
+
+        // ஆன்லைன் டேட்டாபேஸ் ஏற்கும் கீ (Keys)-க்குத் தகுந்தவாறு மாற்றி அமைத்துள்ளேன்
         const complaintData = {
-            id: generatedId,
-            employeeName: document.getElementById('employeeName').value,
-            sectionName: document.getElementById('sectionName').value,
+            id: numericId,
+            staff_name: document.getElementById('employeeName').value,
+            section_name: document.getElementById('sectionName').value,
             position: document.getElementById('employeePosition').value,
-            faultyComponent: document.getElementById('faultyComponent').value,
-            breakerStatus: document.getElementById('breakerStatus').value,
-            earthCondition: document.getElementById('earthCondition').value,
+            component: document.getElementById('faultyComponent').value,
+            breaker_status: document.getElementById('breakerStatus').value,
+            earth_condition: document.getElementById('earthCondition').value,
             description: document.getElementById('complaintDetails').value,
-            status: "Pending ⏳",
-            adminClosingNotes: "",
-            date: new Date().toLocaleDateString()
+            status: "Pending",
+            date: new Date().toISOString() // ISO வடிவில் சரியான சர்வதேச தேதி அமைப்பு
         };
 
-        let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
-        localDB.push(complaintData);
-        localStorage.setItem('eb_it_amc_db_split', JSON.stringify(localDB));
+        try {
+            const response = await fetch(`${API_BASE_URL}/complaints`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(complaintData)
+            });
 
-        alert(`⚡ Ticket Registered Successfully!\n\nYour Ticket ID is: ${generatedId}`);
-        document.getElementById('grievanceForm').reset();
-        document.getElementById('photoSection').style.display = 'none';
+            if (response.ok) {
+                alert(`⚡ Ticket Registered Successfully in Cloud Database!\n\nYour Ticket ID is: EB${numericId}`);
+                document.getElementById('grievanceForm').reset();
+                document.getElementById('photoSection').style.display = 'none';
+            } else {
+                alert('சர்வர்ல சேவ் ஆகல அண்ணே! தயவுசெய்து மீண்டும் முயற்சிக்கவும்.');
+            }
+        } catch (error) {
+            console.error("Error submitting:", error);
+            alert('நெட்வொர்க் பிரச்சனை அண்ணே! ஆன்லைன் சர்வரை இணைக்க முடியவில்லை.');
+        } finally {
+            submitBtn.innerText = "Submit Ticket to IT Team";
+            submitBtn.disabled = false;
+        }
     }
 
-    function trackGrievance() {
-        const trackId = document.getElementById('trackId').value.trim().toUpperCase();
+    // 🔍 ஆன்லைன் சர்வரிலிருந்து லைவ் ஸ்டேட்டஸை டிராக் செய்யும் ஃபங்க்ஷன்
+    async function trackGrievance() {
+        let rawTrackId = document.getElementById('trackId').value.trim().toUpperCase();
         const trackResult = document.getElementById('trackResult');
-        if(!trackId) { alert('Please enter a Ticket ID'); return; }
+        if(!rawTrackId) { alert('Please enter a Ticket ID'); return; }
 
-        let localDB = JSON.parse(localStorage.getItem('eb_it_amc_db_split')) || [];
-        const foundTicket = localDB.find(ticket => ticket.id === trackId);
+        // தேடும்போது 'EB' எழுத்தை நீக்கிவிட்டு வெறும் எண்ணை மட்டும் எடுக்கிறது (எ.கா: 293082)
+        let numericId = rawTrackId.replace('EB', '');
+
         trackResult.style.display = 'block';
+        trackResult.className = 'alert';
+        trackResult.innerHTML = 'Searching live database...';
 
-        if (foundTicket) {
-            trackResult.className = 'alert alert-success';
-            let badge = 'badge-pending';
-            if(foundTicket.status.includes('Progress')) badge = 'badge-progress';
-            if(foundTicket.status.includes('Closed')) badge = 'badge-closed';
+        try {
+            const response = await fetch(`${API_BASE_URL}/all-complaints`);
+            if(!response.ok) throw new Error();
+            
+            const liveDB = await response.json();
+            const foundTicket = liveDB.find(ticket => String(ticket.id) === String(numericId));
 
-            let closingNotesHTML = foundTicket.adminClosingNotes ? `<p style="color:#d35400;"><strong>🛠 Closing Remarks (Admin):</strong> ${foundTicket.adminClosingNotes}</p>` : '';
+            if (foundTicket) {
+                trackResult.className = 'alert alert-success';
+                let currentStatus = foundTicket.status || 'Pending';
+                
+                let badge = 'badge-pending';
+                if(currentStatus.includes('Progress')) badge = 'badge-progress';
+                if(currentStatus.includes('Resolved') || currentStatus.includes('Closed')) badge = 'badge-closed';
 
-            trackResult.innerHTML = `
-                <div style="text-align: left; color: #2c3e50;">
-                    <p><strong>🎟 Ticket ID:</strong> <span style="color:#2563eb; font-weight:bold;">${foundTicket.id}</span></p>
-                    <p><strong>🟢 Status:</strong> <span class="status-badge ${badge}">${foundTicket.status}</span></p>
-                    <p><strong>👤 Name:</strong> ${foundTicket.employeeName} (${foundTicket.position})</p>
-                    <p><strong>⚙️ Component:</strong> ${foundTicket.faultyComponent}</p>
-                    <p><strong>📝 Description:</strong> ${foundTicket.description}</p>
-                    ${closingNotesHTML}
-                </div>`;
-        } else {
+                let staffName = foundTicket.staff_name || foundTicket.employeeName || 'N/A';
+                let pos = foundTicket.position || 'A.E';
+                let comp = foundTicket.component || 'N/A';
+                let desc = foundTicket.description || 'N/A';
+
+                trackResult.innerHTML = `
+                    <div style="text-align: left; color: #2c3e50;">
+                        <p><strong>🎟 Ticket ID:</strong> <span style="color:#2563eb; font-weight:bold;">EB${foundTicket.id}</span></p>
+                        <p><strong>🟢 Status:</strong> <span class="status-badge ${badge}">${currentStatus}</span></p>
+                        <p><strong>👤 Name:</strong> ${staffName} (${pos})</p>
+                        <p><strong>⚙️ Component:</strong> ${comp}</p>
+                        <p><strong>📝 Description:</strong> ${desc}</p>
+                    </div>`;
+            } else {
+                trackResult.className = 'alert alert-danger';
+                trackResult.innerHTML = `<strong>❌ Ticket ID (EB${numericId}) Not Found in Cloud Database!</strong>`;
+            }
+        } catch (error) {
             trackResult.className = 'alert alert-danger';
-            trackResult.innerHTML = `<strong>❌ Ticket ID Not Found!</strong>`;
+            trackResult.innerHTML = `<strong>❌ சர்வர்ல இருந்து டேட்டா எடுக்க முடியல அண்ணே!</strong>`;
         }
     }
 </script>
