@@ -103,7 +103,7 @@
 
 <div class="container">
     <h2>📊 AMC Complaint Report for Admin Panel</h2>
-    <div class="subtitle">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த அனைத்து புகார்களின் விபரம் (From 20-06-2026):</div>
+    <div class="subtitle">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த அனைத்து புகார்களின் விபரம்:</div>
     
     <div class="top-bar">
         <button class="btn-download" onclick="downloadPDF()">📄 PDF அறிக்கை பதிவிறக்கம் (Download Report)</button>
@@ -123,7 +123,7 @@
             </tr>
         </thead>
         <tbody id="complaintTableBody">
-            <!-- புகார்கள் இங்கே லோட் ஆகும் -->
+            <!-- புகார்கள் அனைத்தும் இங்கே லோட் ஆகும் -->
         </tbody>
     </table>
 </div>
@@ -140,21 +140,8 @@
             if (!response.ok) throw new Error('Server issues');
             const allComplaints = await response.json();
             
-            // 🎯 20-06-2026 தேதியில் இருந்து வந்த புகார்களை மட்டும் பில்டர் செய்யும் கண்டிஷன்
-            const targetDate = new Date('2026-06-20');
-            targetDate.setHours(0,0,0,0);
-
-            const filteredComplaints = allComplaints.filter(t => {
-                let rDate = t.date || t.created_at || t.createdAt || '';
-                if (!rDate) return false;
-                
-                let complaintDate = new Date(rDate);
-                complaintDate.setHours(0,0,0,0);
-                
-                return complaintDate >= targetDate;
-            });
-
-            displayData(filteredComplaints);
+            // எந்த ஃபில்டரும் இல்லாமல் அனைத்துப் புகார்களையும் அப்படியே காட்டுகிறோம் அண்ணே!
+            displayData(allComplaints);
         } catch (error) {
             console.log("Error:", error);
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: #ef4444; font-weight: bold;">டேட்டாபேஸ் கனெக்ட் ஆகல அண்ணே!</td></tr>';
@@ -165,8 +152,9 @@
         const tbody = document.getElementById('complaintTableBody');
         tbody.innerHTML = '';
 
+        // "புகார்கள் எதுவும் இல்லை" என்ற வரியை முற்றிலும் தூக்கியாச்சு அண்ணே!
         if(complaints.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; font-weight: bold; color: #f59e0b;">20-06-2026 தேதியில் இருந்து புகார்கள் எதுவும் இல்லை அண்ணே!</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No complaints found.</td></tr>';
             return;
         }
 
@@ -176,7 +164,7 @@
             let component = ticket.component || ticket.issue_type || ticket.title || 'N/A';
             let description = ticket.description || 'N/A';
             
-            // தேதி வடிவத்தை DD-MM-YYYY ஆக மாற்றுதல்
+            // 📅 எல்லாத் தேதியையும் DD-MM-YYYY வடிவத்திற்கு மாற்றும் பகுதி
             let rawDate = ticket.date || ticket.created_at || ticket.createdAt || '';
             let displayDate = 'N/A';
             
@@ -186,7 +174,7 @@
                     let day = String(dateObj.getDate()).padStart(2, '0');
                     let month = String(dateObj.getMonth() + 1).padStart(2, '0');
                     let year = dateObj.getFullYear();
-                    displayDate = `${day}-${month}-${year}`;
+                    displayDate = `${day}-${month}-${year}`; // இதுதான் உங்களுக்குத் தேவைப்பட்ட சரியான வடிவம்!
                 }
             }
 
