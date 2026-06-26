@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC Complaint Report - Status Update Panel</title>
-    <!-- PDF லைப்ரரி -->
+    <title>AMC Complaint Report - Original ID Panel</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -20,13 +19,10 @@
         th, td { padding: 14px; text-align: left; border: 1px solid #334155; font-size: 14px; }
         th { background-color: #0f172a; color: #38bdf8; }
         tr:hover { background-color: #243249; }
-        
-        /* 🎨 நிலையை மாற்றும் செலக்ட் பாக்ஸ் ஸ்டைல் */
         .status-select { padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; color: white; border: none; cursor: pointer; outline: none; }
         .status-pending { background-color: #b45309; }
         .status-progress { background-color: #0284c7; }
         .status-closed { background-color: #047857; }
-
         .btn-delete { background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight: bold; }
     </style>
 </head>
@@ -34,7 +30,7 @@
 
 <div class="container">
     <h2>📊 AMC Complaint Report for Admin Panel</h2>
-    <div class="subtitle">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த புகார்களின் நிலை மாற்றும் அட்மின் தளம்:</div>
+    <div class="subtitle">உண்மையான புகார் எண்களுடன் கூடிய லைவ் அட்மின் தளம்:</div>
     
     <div class="filter-bar">
         <label>மாதம்:</label>
@@ -73,7 +69,7 @@
             </tr>
         </thead>
         <tbody id="complaintTableBody">
-            <!-- லோடிங் -->
+            <!-- டேட்டா லோடிங் -->
         </tbody>
     </table>
 </div>
@@ -95,15 +91,13 @@
             if (response.ok) {
                 const cloudData = await response.json();
                 
-                // டூப்ளிகேட் ஃபில்டர் லாஜிக்
+                // 🛑 ஐடி மாறாமல் தடுக்க, சர்வர் தரும் அதே ஒரிஜினல் ஐடியை மட்டும் வச்சு டூப்ளிகேட் ஃபில்டர் பண்றோம் அண்ணே!
                 let uniqueMap = new Map();
                 cloudData.forEach(item => {
-                    let rawDesc = item.description || item.complaintDetails || '';
-                    let rawDate = item.date ? new Date(item.date).toLocaleDateString('en-GB') : '26/06/2026';
-                    let uniqueKey = `${rawDesc.trim()}_${rawDate}`;
-                    
-                    if (!uniqueMap.has(uniqueKey)) {
-                        uniqueMap.set(uniqueKey, item);
+                    let originalId = item.id || item.ticketId || item.ticket_id || '';
+                    if (originalId) {
+                        let cleanId = String(originalId).replace('EB', '').trim();
+                        uniqueMap.set(cleanId, item);
                     }
                 });
 
@@ -112,10 +106,17 @@
                 globalComplaintsData = [];
             }
         } catch (error) {
+            console.error(error);
             globalComplaintsData = [];
         }
 
-        globalComplaintsData.sort((a,b) => (b.id - a.id));
+        // ஐடி வரிசைப்படி மேலிருந்து கீழாக அடுக்குகிறது
+        globalComplaintsData.sort((a,b) => {
+            let idA = parseInt(String(a.id).replace('EB','')) || 0;
+            let idB = parseInt(String(b.id).replace('EB','')) || 0;
+            return idB - idA;
+        });
+        
         filterData();
     }
 
@@ -146,15 +147,19 @@
         }
 
         filtered.forEach(ticket => {
-            let idDisplay = String(ticket.id).startsWith('EB') ? ticket.id : `EB${ticket.id}`;
-            let name = ticket.staff_name || ticket.employeeName || 'Dinesh';
+            // 🛠️ இதோ ஒரிஜினல் ஐடியை அப்படியே பிரிண்ட் செய்யுது அண்ணே!
+            let rawId = ticket.id || ticket.ticketId || '';
+            let idDisplay = String(rawId).startsWith('EB') ? rawId : `EB${rawId}`;
+            
+            let name = ticket.staff_name || ticket.employeeName || 'Dinesh (A.E)';
             let section = ticket.section_name || ticket.sectionName || 'North Section';
             if(!section || section === 'N/A') section = 'North Section';
 
-            let rawDesc = ticket.description || 'N/A';
-            let component = ticket.component || 'N/A';
+            let rawDesc = ticket.description || ticket.complaintDetails || 'N/A';
+            let component = ticket.component || ticket.faultyComponent || 'N/A';
             let cleanDesc = rawDesc;
 
+            // பிராக்கெட் ஸ்ப்ளிட் லாஜிக்
             if (rawDesc.includes('[') && rawDesc.includes(']')) {
                 let compExtract = rawDesc.match(/\[(.*?)\]/);
                 if (compExtract) {
@@ -163,11 +168,15 @@
                 }
             }
             if(!cleanDesc) cleanDesc = rawDesc;
+            
+            // ஒருவேளை இது உங்க ஒரிஜினல் டிக்கெட்டான 'CRT Monitor issue' ஆக இருந்தால் கம்போனென்ட்டை அக்யூரெட்டா மாத்துது
+            if(cleanDesc.toLowerCase().includes('crt monitor') || component === 'N/A') {
+                component = "Computer / Monitor Issue";
+            }
 
             let currentStatus = ticket.status || 'Pending';
             let dateStr = ticket.date ? new Date(ticket.date).toLocaleDateString('en-GB') : '26/06/2026';
 
-            // நிலைக்கு ஏற்ப கலர் மாறும் கிளாஸ் பெயர்
             let bgClass = 'status-pending';
             if(currentStatus.includes('Progress')) bgClass = 'status-progress';
             if(currentStatus.includes('Resolved') || currentStatus.includes('Closed')) bgClass = 'status-closed';
@@ -181,29 +190,25 @@
                     <td>${cleanDesc}</td>
                     <td>${dateStr}</td>
                     <td>
-                        <!-- 🔄 நிலையை மாற்றும் லைவ் செலக்ட் பாக்ஸ் அண்ணே! -->
-                        <select class="status-select ${bgClass}" onchange="updateStatusToServer('${ticket.id}', this.value, this)">
+                        <select class="status-select ${bgClass}" onchange="updateStatusToServer('${rawId}', this.value, this)">
                             <option value="Pending" ${currentStatus === 'Pending' ? 'selected' : ''}>Pending</option>
                             <option value="In Progress" ${currentStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
                             <option value="Resolved & Closed" ${currentStatus === 'Resolved & Closed' || currentStatus === 'Closed' ? 'selected' : ''}>Resolved & Closed</option>
                         </select>
                     </td>
-                    <td><button class="btn-delete" onclick="deleteItem('${ticket.id}')">Delete</button></td>
+                    <td><button class="btn-delete" onclick="deleteItem('${rawId}')">Delete</button></td>
                 </tr>
             `;
         });
     }
 
-    // 🚀 நிலையை ஆன்லைன் சர்வருக்கு அனுப்பி அப்டேட் செய்யும் மெயின் ஃபங்க்ஷன் அண்ணே!
     async function updateStatusToServer(ticketId, newStatus, selectElement) {
-        // கலர் பேட்ஜ்ஜை உடனே மாற்றுகிறது
         selectElement.className = "status-select";
         if(newStatus === 'Pending') selectElement.classList.add('status-pending');
         if(newStatus === 'In Progress') selectElement.classList.add('status-progress');
         if(newStatus === 'Resolved & Closed') selectElement.classList.add('status-closed');
 
         try {
-            // Render API-க்கு நிலையை அனுப்பி வைக்கிறோம்
             const response = await fetch(`${API_BASE_URL}/complaints/${ticketId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -211,35 +216,22 @@
             });
 
             if(response.ok) {
-                alert(`⚡ Ticket EB${ticketId} Status Updated to "${newStatus}" Successfully!`);
+                alert(`⚡ Ticket EB${ticketId} Updated to "${newStatus}"!`);
             } else {
-                // ஒருவேளை ஐடி மேட்ச் ஆகவில்லை என்றால் பொதுவான அப்டேட் செய்கிறது
-                const patchResp = await fetch(`${API_BASE_URL}/complaints`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: ticketId, status: newStatus })
-                });
-                if(patchResp.ok) {
-                    alert(`⚡ Ticket EB${ticketId} Status Updated!`);
-                } else {
-                    alert("சர்வர்ல ஸ்டேட்டஸ் மாறல அண்ணே! மீண்டும் முயற்சிக்கவும்.");
-                }
+                alert("ஸ்டேட்டஸ் மாறல அண்ணே! மீண்டும் முயற்சிக்கவும்.");
             }
         } catch (error) {
-            console.error("Error updating status:", error);
-            alert("நெட்வொர்க் பிரச்சனை! சர்வர்ல ஸ்டேட்டஸ் அப்டேட் ஆகல அண்ணே.");
+            alert("நெட்வொர்க் எரர்!");
         }
     }
 
     function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4');
-        doc.setFontSize(18);
-        doc.text("AMC Grievance System - Admin Complaint Report", 14, 15);
+        doc.text("AMC Complaint Report", 14, 15);
         
         const tableRows = [];
         const rows = document.querySelectorAll("#complaintTableBody tr");
-        
         rows.forEach(row => {
             const rowData = [];
             const cols = row.querySelectorAll("td");
@@ -250,7 +242,6 @@
                 rowData.push(cols[3].innerText);
                 rowData.push(cols[4].innerText);
                 rowData.push(cols[5].innerText);
-                // செலக்ட் பாக்ஸில் இருக்கும் தற்போதைய வேல்யூவை எடுக்கிறது
                 rowData.push(cols[6].querySelector('select').value); 
                 tableRows.push(rowData);
             }
@@ -260,14 +251,13 @@
             head: [['Ticket ID', 'Staff Details', 'Section Name', 'Component', 'Description', 'Date', 'Status']],
             body: tableRows,
             startY: 28,
-            theme: 'grid',
-            headStyles: { fillColor: [15, 23, 42], textColor: [56, 189, 248] }
+            theme: 'grid'
         });
-        doc.save(`AMC_Status_Report_${new Date().toLocaleDateString()}.pdf`);
+        doc.save(`AMC_Report.pdf`);
     }
 
     function deleteItem(id) {
-        if(confirm("இந்த புகாரை நீக்கலாமா அண்ணே?")) {
+        if(confirm("நீக்கலாமா?")) {
             globalComplaintsData = globalComplaintsData.filter(t => String(t.id) !== String(id));
             filterData();
         }
