@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC Complaint Report - Strict Admin Panel</title>
+    <title>AMC Complaint Report - Status Update Panel</title>
+    <!-- PDF லைப்ரரி -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -19,9 +20,13 @@
         th, td { padding: 14px; text-align: left; border: 1px solid #334155; font-size: 14px; }
         th { background-color: #0f172a; color: #38bdf8; }
         tr:hover { background-color: #243249; }
-        .badge { padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; }
-        .badge-pending { background-color: #b45309; color: #fef3c7; }
-        .badge-resolved { background-color: #047857; color: #d1fae5; }
+        
+        /* 🎨 நிலையை மாற்றும் செலக்ட் பாக்ஸ் ஸ்டைல் */
+        .status-select { padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; color: white; border: none; cursor: pointer; outline: none; }
+        .status-pending { background-color: #b45309; }
+        .status-progress { background-color: #0284c7; }
+        .status-closed { background-color: #047857; }
+
         .btn-delete { background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight: bold; }
     </style>
 </head>
@@ -29,7 +34,7 @@
 
 <div class="container">
     <h2>📊 AMC Complaint Report for Admin Panel</h2>
-    <div class="subtitle">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த தனித்துவமான புகார்களின் விபரம்:</div>
+    <div class="subtitle">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த புகார்களின் நிலை மாற்றும் அட்மின் தளம்:</div>
     
     <div class="filter-bar">
         <label>மாதம்:</label>
@@ -63,24 +68,26 @@
                 <th>பிரச்சனை (Component)</th>
                 <th>விபரம் (Description)</th>
                 <th>தேதி</th>
-                <th>நிலை</th>
+                <th>நிலை (மாற்ற கிளிக் செய்க)</th>
                 <th>செயல்பாடு</th>
             </tr>
         </thead>
         <tbody id="complaintTableBody">
-            </tbody>
+            <!-- லோடிங் -->
+        </tbody>
     </table>
 </div>
 
 <script>
     let globalComplaintsData = [];
+    const API_BASE_URL = 'https://online-grievance-system.onrender.com/api';
 
     async function loadComplaints() {
         const tbody = document.getElementById('complaintTableBody');
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">டேட்டாபேஸ் இணைக்கப்படுகிறது... தயவுசெய்து காத்திருக்கவும்...</td></tr>';
         
         try {
-            const response = await fetch('https://online-grievance-system.onrender.com/api/all-complaints', {
+            const response = await fetch(`${API_BASE_URL}/all-complaints`, {
                 cache: 'no-store',
                 headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
             });
@@ -88,11 +95,9 @@
             if (response.ok) {
                 const cloudData = await response.json();
                 
-                // 🛑 டூப்ளிகேட்களை முழுமையாக நீக்கும் ஸ்ட்ரிக்ட் மேப் லாஜிக் அண்ணே!
+                // டூப்ளிகேட் ஃபில்டர் லாஜிக்
                 let uniqueMap = new Map();
-                
                 cloudData.forEach(item => {
-                    // ஒரே டிஸ்கிரிப்ஷன் மற்றும் ஒரே தேதியில் இருந்தால் அதை டூப்ளிகேட்டாக கருதும்
                     let rawDesc = item.description || item.complaintDetails || '';
                     let rawDate = item.date ? new Date(item.date).toLocaleDateString('en-GB') : '26/06/2026';
                     let uniqueKey = `${rawDesc.trim()}_${rawDate}`;
@@ -143,18 +148,13 @@
         filtered.forEach(ticket => {
             let idDisplay = String(ticket.id).startsWith('EB') ? ticket.id : `EB${ticket.id}`;
             let name = ticket.staff_name || ticket.employeeName || 'Dinesh';
-            
-            // 🏢 பிரிவு பெயர் காலியாகவோ அல்லது N/A வாகவோ இருந்தால் 'North Section' என செட் செய்யும்
-            let section = ticket.section_name || ticket.sectionName || '';
-            if(!section || section === 'N/A') {
-                section = 'North Section';
-            }
+            let section = ticket.section_name || ticket.sectionName || 'North Section';
+            if(!section || section === 'N/A') section = 'North Section';
 
             let rawDesc = ticket.description || 'N/A';
             let component = ticket.component || 'N/A';
             let cleanDesc = rawDesc;
 
-            // 🔍 பிராக்கெட் டெக்ஸ்டை துல்லியமாகப் பிரிக்கும் லாஜிக் அண்ணே!
             if (rawDesc.includes('[') && rawDesc.includes(']')) {
                 let compExtract = rawDesc.match(/\[(.*?)\]/);
                 if (compExtract) {
@@ -162,12 +162,15 @@
                     cleanDesc = rawDesc.replace(/\[.*?\]/, '').trim();
                 }
             }
+            if(!cleanDesc) cleanDesc = rawDesc;
 
-            // ஒருவேளை விபரம் காலியாகி இருந்தால் பழைய விபரத்தையே வைக்கும்
-            if(!cleanDesc) { cleanDesc = rawDesc; }
-
-            let status = ticket.status || 'Pending';
+            let currentStatus = ticket.status || 'Pending';
             let dateStr = ticket.date ? new Date(ticket.date).toLocaleDateString('en-GB') : '26/06/2026';
+
+            // நிலைக்கு ஏற்ப கலர் மாறும் கிளாஸ் பெயர்
+            let bgClass = 'status-pending';
+            if(currentStatus.includes('Progress')) bgClass = 'status-progress';
+            if(currentStatus.includes('Resolved') || currentStatus.includes('Closed')) bgClass = 'status-closed';
 
             tbody.innerHTML += `
                 <tr>
@@ -177,22 +180,63 @@
                     <td><span style="color:#38bdf8; font-weight:bold;">${component}</span></td>
                     <td>${cleanDesc}</td>
                     <td>${dateStr}</td>
-                    <td><span class="badge ${status.includes('Resol') || status.includes('Closed') ? 'badge-resolved' : 'badge-pending'}">${status}</span></td>
+                    <td>
+                        <!-- 🔄 நிலையை மாற்றும் லைவ் செலக்ட் பாக்ஸ் அண்ணே! -->
+                        <select class="status-select ${bgClass}" onchange="updateStatusToServer('${ticket.id}', this.value, this)">
+                            <option value="Pending" ${currentStatus === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="In Progress" ${currentStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="Resolved & Closed" ${currentStatus === 'Resolved & Closed' || currentStatus === 'Closed' ? 'selected' : ''}>Resolved & Closed</option>
+                        </select>
+                    </td>
                     <td><button class="btn-delete" onclick="deleteItem('${ticket.id}')">Delete</button></td>
                 </tr>
             `;
         });
     }
 
+    // 🚀 நிலையை ஆன்லைன் சர்வருக்கு அனுப்பி அப்டேட் செய்யும் மெயின் ஃபங்க்ஷன் அண்ணே!
+    async function updateStatusToServer(ticketId, newStatus, selectElement) {
+        // கலர் பேட்ஜ்ஜை உடனே மாற்றுகிறது
+        selectElement.className = "status-select";
+        if(newStatus === 'Pending') selectElement.classList.add('status-pending');
+        if(newStatus === 'In Progress') selectElement.classList.add('status-progress');
+        if(newStatus === 'Resolved & Closed') selectElement.classList.add('status-closed');
+
+        try {
+            // Render API-க்கு நிலையை அனுப்பி வைக்கிறோம்
+            const response = await fetch(`${API_BASE_URL}/complaints/${ticketId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if(response.ok) {
+                alert(`⚡ Ticket EB${ticketId} Status Updated to "${newStatus}" Successfully!`);
+            } else {
+                // ஒருவேளை ஐடி மேட்ச் ஆகவில்லை என்றால் பொதுவான அப்டேட் செய்கிறது
+                const patchResp = await fetch(`${API_BASE_URL}/complaints`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: ticketId, status: newStatus })
+                });
+                if(patchResp.ok) {
+                    alert(`⚡ Ticket EB${ticketId} Status Updated!`);
+                } else {
+                    alert("சர்வர்ல ஸ்டேட்டஸ் மாறல அண்ணே! மீண்டும் முயற்சிக்கவும்.");
+                }
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+            alert("நெட்வொர்க் பிரச்சனை! சர்வர்ல ஸ்டேட்டஸ் அப்டேட் ஆகல அண்ணே.");
+        }
+    }
+
     function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4');
-
         doc.setFontSize(18);
         doc.text("AMC Grievance System - Admin Complaint Report", 14, 15);
-        doc.setFontSize(10);
-        doc.text(`Report Generated On: ${new Date().toLocaleString()}`, 14, 22);
-
+        
         const tableRows = [];
         const rows = document.querySelectorAll("#complaintTableBody tr");
         
@@ -206,7 +250,8 @@
                 rowData.push(cols[3].innerText);
                 rowData.push(cols[4].innerText);
                 rowData.push(cols[5].innerText);
-                rowData.push(cols[6].innerText);
+                // செலக்ட் பாக்ஸில் இருக்கும் தற்போதைய வேல்யூவை எடுக்கிறது
+                rowData.push(cols[6].querySelector('select').value); 
                 tableRows.push(rowData);
             }
         });
@@ -216,11 +261,9 @@
             body: tableRows,
             startY: 28,
             theme: 'grid',
-            headStyles: { fillColor: [15, 23, 42], textColor: [56, 189, 248] },
-            styles: { fontSize: 9, cellPadding: 3 }
+            headStyles: { fillColor: [15, 23, 42], textColor: [56, 189, 248] }
         });
-
-        doc.save(`AMC_Clean_Report_${new Date().toLocaleDateString()}.pdf`);
+        doc.save(`AMC_Status_Report_${new Date().toLocaleDateString()}.pdf`);
     }
 
     function deleteItem(id) {
