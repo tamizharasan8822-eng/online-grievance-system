@@ -35,35 +35,10 @@
             font-size: 18px;
             margin-bottom: 25px;
         }
-        .filter-section {
-            background: #0f172a;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
+        .top-bar {
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: center;
-            border: 1px solid #334155;
-        }
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .filter-group label {
-            font-size: 14px;
-            color: #38bdf8;
-            font-weight: bold;
-        }
-        select {
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid #334155;
-            background: #1e293b;
-            color: white;
-            font-weight: bold;
-            outline: none;
+            justify-content: flex-end;
+            margin-bottom: 20px;
         }
         .btn-download {
             background-color: #10b981;
@@ -73,7 +48,6 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            margin-top: 20px;
         }
         .btn-download:hover {
             background-color: #059669;
@@ -129,36 +103,9 @@
 
 <div class="container">
     <h2>📊 AMC Complaint Report for Admin Panel</h2>
-    <div class="subtitle">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த அனைத்து புகார்களின் விபரம்:</div>
+    <div class="subtitle">ஆபீஸ் ஸ்டாஃப் பதிவு செய்த அனைத்து புகார்களின் விபரம் (From 20-06-2026):</div>
     
-    <div class="filter-section">
-        <div class="filter-group">
-            <label>மாதம் தேர்ந்தெடு (Select Month):</label>
-            <select id="monthFilter" onchange="filterComplaints()">
-                <option value="All">அனைத்து மாதங்கள் (All)</option>
-                <option value="01">ஜனவரி (January)</option>
-                <option value="02">பிப்ரவரி (February)</option>
-                <option value="03">மார்ச் (March)</option>
-                <option value="04">ஏப்ரல் (April)</option>
-                <option value="05">மே (May)</option>
-                <option value="06">ஜூன் (June)</option>
-                <option value="07">ஜூலை (July)</option>
-                <option value="08">ஆகஸ்ட் (August)</option>
-                <option value="09">செப்டம்பர் (September)</option>
-                <option value="10">அக்டோபர் (October)</option>
-                <option value="11">நவம்பர் (November)</option>
-                <option value="12">டிசம்பர் (December)</option>
-            </select>
-        </div>
-        
-        <div class="filter-group">
-            <label>வருடம் தேர்ந்தெடு (Select Year):</label>
-            <select id="yearFilter" onchange="filterComplaints()">
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-            </select>
-        </div>
-
+    <div class="top-bar">
         <button class="btn-download" onclick="downloadPDF()">📄 PDF அறிக்கை பதிவிறக்கம் (Download Report)</button>
     </div>
 
@@ -176,14 +123,13 @@
             </tr>
         </thead>
         <tbody id="complaintTableBody">
-            <!-- ஆன்லைன் கிளவுட் புகார்கள் இங்கே வரும் -->
+            <!-- புகார்கள் இங்கே லோட் ஆகும் -->
         </tbody>
     </table>
 </div>
 
 <script>
     const ONLINE_API_URL = 'https://online-grievance-system.onrender.com/api/all-complaints';
-    let allComplaints = [];
 
     async function loadComplaints() {
         const tbody = document.getElementById('complaintTableBody');
@@ -192,36 +138,27 @@
         try {
             const response = await fetch(ONLINE_API_URL); 
             if (!response.ok) throw new Error('Server issues');
-            allComplaints = await response.json();
-            filterComplaints();
+            const allComplaints = await response.json();
+            
+            // 🎯 20-06-2026 தேதியில் இருந்து வந்த புகார்களை மட்டும் பில்டர் செய்யும் கண்டிஷன்
+            const targetDate = new Date('2026-06-20');
+            targetDate.setHours(0,0,0,0);
+
+            const filteredComplaints = allComplaints.filter(t => {
+                let rDate = t.date || t.created_at || t.createdAt || '';
+                if (!rDate) return false;
+                
+                let complaintDate = new Date(rDate);
+                complaintDate.setHours(0,0,0,0);
+                
+                return complaintDate >= targetDate;
+            });
+
+            displayData(filteredComplaints);
         } catch (error) {
             console.log("Error:", error);
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: #ef4444; font-weight: bold;">டேட்டாபேஸ் கனெக்ட் ஆகல அண்ணே!</td></tr>';
         }
-    }
-
-    // தேதி சரியாக ஃபில்டர் ஆக ஜாவாஸ்கிரிப்ட் அப்டேட்
-    function filterComplaints() {
-        const month = document.getElementById('monthFilter').value;
-        const year = document.getElementById('yearFilter').value;
-        
-        let filtered = allComplaints;
-
-        // வருட ஃபில்டர்
-        filtered = filtered.filter(t => {
-            let rDate = t.date || t.created_at || t.createdAt || '';
-            return String(rDate).includes(year);
-        });
-
-        // மாத ஃபில்டர்
-        if (month !== 'All') {
-            filtered = filtered.filter(t => {
-                let rDate = t.date || t.created_at || t.createdAt || '';
-                return String(rDate).includes(`-${month}-`);
-            });
-        }
-        
-        displayData(filtered);
     }
 
     function displayData(complaints) {
@@ -229,22 +166,30 @@
         tbody.innerHTML = '';
 
         if(complaints.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; font-weight: bold; color: #f59e0b;">புகார்கள் எதுவும் இல்லை அண்ணே!</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; font-weight: bold; color: #f59e0b;">20-06-2026 தேதியில் இருந்து புகார்கள் எதுவும் இல்லை அண்ணே!</td></tr>';
             return;
         }
 
         complaints.forEach(ticket => {
-            // 🛠️ அண்ணே, உங்க டேட்டாபேஸ் காலம்களை இங்க பக்காவா மேட்ச் பண்ணிருக்கேன்!
             let staffName = ticket.staff_name || ticket.staffName || ticket.employee_name || ticket.employeeName || 'Jayakumar';
             let sectionName = ticket.section_name || ticket.sectionName || ticket.department || ticket.section || 'N/A';
             let component = ticket.component || ticket.issue_type || ticket.title || 'N/A';
             let description = ticket.description || 'N/A';
             
-            // தேதி ஃபார்மேட் சரிசெய்தல்
-            let rawDate = ticket.date || ticket.created_at || ticket.createdAt || 'N/A';
-            let displayDate = rawDate.includes('T') ? rawDate.split('T')[0] : rawDate;
+            // தேதி வடிவத்தை DD-MM-YYYY ஆக மாற்றுதல்
+            let rawDate = ticket.date || ticket.created_at || ticket.createdAt || '';
+            let displayDate = 'N/A';
+            
+            if (rawDate) {
+                let dateObj = new Date(rawDate);
+                if (!isNaN(dateObj.getTime())) {
+                    let day = String(dateObj.getDate()).padStart(2, '0');
+                    let month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    let year = dateObj.getFullYear();
+                    displayDate = `${day}-${month}-${year}`;
+                }
+            }
 
-            // இப்போ டிஸ்கிரிப்ஷன்ல இருக்குற பிராக்கெட் வார்த்தையை பிரச்சனைக்கு மாத்துறோம் (ஒருவேளை பிரச்சனை N/A ஆ இருந்தா)
             if((component === 'N/A' || component === '') && description.startsWith('[')) {
                 let closingBracket = description.indexOf(']');
                 if(closingBracket > 0) {
@@ -259,7 +204,7 @@
                     <td>${sectionName}</td>
                     <td><span style="color:#38bdf8; font-weight:bold;">${component}</span></td>
                     <td>${description}</td>
-                    <td>${displayDate}</td>
+                    <td><strong>${displayDate}</strong></td>
                     <td>
                         <span class="badge ${ticket.status === 'Resolved' || ticket.status === 'Resolved & Closed' ? 'badge-resolved' : 'badge-pending'}">
                             ${ticket.status || 'Pending'} ${ticket.status === 'Resolved' || ticket.status === 'Resolved & Closed' ? '✅' : '⏳'}
