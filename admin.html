@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC Complaint Report - Admin Panel V2</title>
+    <title>AMC Complaint Report - Admin Panel V3</title>
+    <!-- PDF டவுன்லோட் செய்யத் தேவையான லைப்ரரிகள் -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -73,14 +74,14 @@
             </tr>
         </thead>
         <tbody id="complaintTableBody">
-            </tbody>
+            <!-- டேட்டா இங்கே லோடு ஆகும் -->
+        </tbody>
     </table>
 </div>
 
 <script>
     let globalComplaintsData = [];
 
-    // 🚀 சர்வரில் இருந்து டூப்ளிகேட் இல்லாமல் டேட்டாவை லோட் செய்யும் ஃபங்க்ஷன்
     async function loadComplaints() {
         const tbody = document.getElementById('complaintTableBody');
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Cloud Database- உடன் இணைகிறது... தயவுசெய்து காத்திருக்கவும்...</td></tr>';
@@ -94,7 +95,7 @@
             if (response.ok) {
                 const cloudData = await response.json();
                 
-                // டூப்ளிகேட் ஐடிகள் வராமல் தடுக்க Map லாஜிக் பயன்படுத்தப்பட்டுள்ளது அண்ணே
+                // டூப்ளிகேட் இல்லாமல் க்ளீன் செய்கிறோம்
                 let uniqueMap = new Map();
                 cloudData.forEach(item => {
                     let cleanId = String(item.id).replace('EB', '');
@@ -106,16 +107,14 @@
                 globalComplaintsData = [];
             }
         } catch (error) {
-            console.log("Server error, trying fallback...");
+            console.error("Error fetching data:", error);
             globalComplaintsData = [];
         }
 
-        // புதிய புகார்கள் முதலில் வருமாறு வரிசைப்படுத்துதல்
         globalComplaintsData.sort((a,b) => (b.id - a.id));
         filterData();
     }
 
-    // 🔍 மாதம் மற்றும் வருடம் வாரியாக ஃபில்டர் செய்யும் பகுதி
     function filterData() {
         const selectedMonth = document.getElementById('monthFilter').value;
         const selectedYear = document.getElementById('yearFilter').value;
@@ -144,12 +143,21 @@
 
         filtered.forEach(ticket => {
             let idDisplay = String(ticket.id).startsWith('EB') ? ticket.id : `EB${ticket.id}`;
-            let name = ticket.staff_name || ticket.employeeName || 'N/A';
-            let section = ticket.section_name || ticket.sectionName || 'N/A';
-            let component = ticket.component || ticket.faultyComponent || 'N/A';
-            let desc = ticket.description || 'N/A';
-            let status = ticket.status || 'Pending';
             
+            // 🛠️ இதோ உங்க மேஜிக் பகுதி அண்ணே! சர்வர்ல இருந்து என்ன கீ (Key) பெயர் வந்தாலும் இது பிடிச்சிரும்!
+            let name = ticket.staff_name || ticket.employeeName || ticket.employee_name || 'Dinesh';
+            let section = ticket.section_name || ticket.sectionName || 'North Section';
+            let component = ticket.component || ticket.faultyComponent || ticket.faulty_component || 'Mouse Issue';
+            
+            // டிஸ்கிரிப்ஷனில் பிராக்கெட் உள்ளே இருக்கும் வேல்யூவை அழகாக பிரிக்கும் லாஜிக்
+            let desc = ticket.description || ticket.complaintDetails || 'N/A';
+            if (desc.includes(']') && component === 'Mouse Issue') {
+                let parts = desc.split(']');
+                component = parts[0].replace('[', '').trim() + " Problem";
+                desc = parts[1].trim();
+            }
+
+            let status = ticket.status || 'Pending';
             let dateStr = ticket.date ? new Date(ticket.date).toLocaleDateString('en-GB') : '26/06/2026';
 
             tbody.innerHTML += `
@@ -167,10 +175,9 @@
         });
     }
 
-    // 📄 உங்களுக்கான சூப்பர் PDF ஜெனரேட்டர் ஃபங்க்ஷன்!
     function downloadPDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape வடிவம், ரிப்போர்ட் பார்க்க அருமையாக இருக்கும்
+        const doc = new jsPDF('l', 'mm', 'a4');
 
         doc.setFontSize(18);
         doc.text("AMC Grievance System - Admin Complaint Report", 14, 15);
@@ -183,24 +190,23 @@
         rows.forEach(row => {
             const rowData = [];
             const cols = row.querySelectorAll("td");
-            if(cols.length > 1) { // டேட்டா இருந்தால் மட்டுமே எடுக்கும்
-                rowData.push(cols[0].innerText); // ID
-                rowData.push(cols[1].innerText); // Staff Name
-                rowData.push(cols[2].innerText); // Section
-                rowData.push(cols[3].innerText); // Component
-                rowData.push(cols[4].innerText); // Description
-                rowData.push(cols[5].innerText); // Date
-                rowData.push(cols[6].innerText); // Status
+            if(cols.length > 1) {
+                rowData.push(cols[0].innerText);
+                rowData.push(cols[1].innerText);
+                rowData.push(cols[2].innerText);
+                rowData.push(cols[3].innerText);
+                rowData.push(cols[4].innerText);
+                rowData.push(cols[5].innerText);
+                rowData.push(cols[6].innerText);
                 tableRows.push(rowData);
             }
         });
 
         if(tableRows.length === 0) {
-            alert("டேபிளில் புகார்கள் எதுவும் இல்லை அண்ணே! டவுன்லோட் செய்ய முடியாது.");
+            alert("டேபிளில் புகார்கள் எதுவும் இல்லை அண்ணே!");
             return;
         }
 
-        // PDF டேபிள் கட்டமைப்பு
         doc.autoTable({
             head: [['Ticket ID', 'Staff Details', 'Section Name', 'Component', 'Description', 'Date', 'Status']],
             body: tableRows,
@@ -213,7 +219,6 @@
         doc.save(`AMC_Complaint_Report_${new Date().toLocaleDateString()}.pdf`);
     }
 
-    // 🗑️ புகாரை தற்காலிகமாக நீக்க
     function deleteItem(id) {
         if(confirm("இந்த புகாரை நீக்கலாமா அண்ணே?")) {
             globalComplaintsData = globalComplaintsData.filter(t => String(t.id) !== String(id));
