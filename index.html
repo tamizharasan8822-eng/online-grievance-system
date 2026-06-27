@@ -99,7 +99,6 @@
         else { photoDiv.style.display = 'none'; elcbInput.required = false; elcbInput.value = ""; }
     }
 
-    // போட்டோவை மெமரியில் சேமிக்க Base64-ஆக மாற்றும் ஃபங்க்ஷன்
     function convertToBase64(file) {
         return new Promise((resolve, reject) => {
             if(!file) resolve("");
@@ -112,15 +111,14 @@
 
     document.getElementById('grievanceForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
         let ticketId = "REG" + Math.floor(100000 + Math.random() * 900000);
         
-        // 📅 நாள், மாதம், வருடம் மற்றும் நேரம் கச்சிதமாக எடுக்கும் வடிவம்
         let now = new Date();
         let day = String(now.getDate()).padStart(2, '0');
         let month = String(now.getMonth() + 1).padStart(2, '0');
         let year = now.getFullYear();
         let time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+        
         let formattedDate = `${day}-${month}-${year} ${time}`;
 
         const materialFile = document.getElementById('materialPhoto').files[0];
@@ -141,7 +139,10 @@
             earth: document.getElementById('earthCondition').value,
             description: document.getElementById('description').value,
             date: formattedDate,
-            status: "Pending"
+            rawMonth: month, // ஃபில்டருக்காக மாதம் சேமிக்கப்படுகிறது
+            rawYear: String(year), // ஃபில்டருக்காக வருடம் சேமிக்கப்படுகிறது
+            status: "Pending",
+            action_taken: "" // தொடக்கத்தில் காலியாக இருக்கும்
         };
 
         localStorage.setItem(`ticket_${ticketId}`, JSON.stringify(ticketData));
@@ -160,10 +161,18 @@
         if (localData) {
             let ticket = JSON.parse(localData);
             resultBox.style.display = "block";
+            
+            // அட்மின் நடவடிக்கை எடுத்திருந்தால் அதை காட்டுவதற்கான கோடு
+            let clientActionText = ticket.action_taken ? 
+                `<p style="margin: 8px 0; color:#16a34a;"><strong>👨‍💻 IT Team Action Taken (நடவடிக்கை விபரம்):</strong> ${ticket.action_taken}</p>` : 
+                `<p style="margin: 8px 0; color:#6b7280; font-style:italic;"><strong>👨‍💻 IT Team Action Taken:</strong> Waiting for IT technician update...</p>`;
+
             resultBox.innerHTML = `
-                <p><strong>Ticket ID:</strong> ${ticket.id}</p>
-                <p><strong>Date & Time:</strong> ${ticket.date}</p>
-                <p><strong>Status:</strong> <span style="background:#b45309; color:white; padding:3px 6px; border-radius:3px; font-weight:bold;">${ticket.status}</span></p>
+                <p style="margin: 6px 0;"><strong>Ticket ID:</strong> ${ticket.id}</p>
+                <p style="margin: 6px 0;"><strong>Date & Time:</strong> ${ticket.date}</p>
+                <p style="margin: 6px 0;"><strong>Status:</strong> <span style="background:#b45309; color:white; padding:3px 6px; border-radius:3px; font-weight:bold;">${ticket.status}</span></p>
+                <hr style="border:0; border-top:1px solid #e2e8f0; margin:10px 0;">
+                ${clientActionText}
             `;
         } else {
             alert("⚠️ Invalid Reference Number!");
