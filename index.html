@@ -32,6 +32,10 @@
             color: #374151;
             font-size: 14px;
         }
+        label::after {
+            content: " *";
+            color: #ef4444; /* எல்லா லேபிளுக்கும் ரெட் ஸ்டார் காட்டும் */
+        }
         input[type="text"], select, textarea, input[type="file"] {
             width: 100%;
             padding: 10px;
@@ -105,19 +109,19 @@
 <body>
 
 <div class="container">
-    <!-- 🏢 தலைப்பு (உங்களுக்குப் பிடிச்சதை வெச்சுக்கலாம் அண்ணே) -->
     <h2 style="margin-top: 0; text-align: center; border-bottom: none;">💻 IT ஆதரவு & AMC குறைதீர்ப்பு மையம்</h2>
     <p style="text-align: center; color: #6b7280; font-size: 13px; margin-top: -10px;">IT Support & AMC Grievance Management</p>
 
     <form id="grievanceForm">
-        <label>User Name (புகார் அளிப்பவர் பெயர்):</label>
+        <label>User Name (புகார் அளிப்பவர் பெயர்)</label>
         <input type="text" id="userName" placeholder="உங்க பெயர் எழுதவும்" required>
 
-        <label>Section Name (பிரிவு பெயர்):</label>
+        <label>Section Name (பிரிவு பெயர்)</label>
         <input type="text" id="sectionName" placeholder="பிரிவு பெயர் எழுதவும்" required>
 
-        <label>Designation (பதவி):</label>
-        <select id="designation">
+        <label>Designation (பதவி)</label>
+        <select id="designation" required>
+            <option value="" disabled selected>-- பதவியைத் தேர்ந்தெடுக்கவும் --</option>
             <option value="A.E">A.E (Assistant Engineer)</option>
             <option value="JE">JE (Junior Engineer)</option>
             <option value="RS">RS (Revenue Supervisor)</option>
@@ -126,9 +130,9 @@
             <option value="Gangman">Gangman</option>
         </select>
 
-        <!-- 🛠️ தமிழ் மற்றும் ஆங்கிலம் கலந்த பிரச்சனைகள் லிஸ்ட் -->
-        <label>Select Faulty Component (பிரச்சனை உள்ள பாகம்):</label>
-        <select id="component">
+        <label>Select Faulty Component (பிரச்சனை உள்ள பாகம்)</label>
+        <select id="component" required>
+            <option value="" disabled selected>-- பிரச்சனையைத் தேர்ந்தெடுக்கவும் --</option>
             <option value="Motherboard Issue">Motherboard Issue (மதர்போர்டு பிரச்சனை)</option>
             <option value="Monitor Issue">Monitor Issue (மானிட்டர் / திரை பிரச்சனை)</option>
             <option value="Keyboard and Mouse Problem">Keyboard and Mouse Problem (கீபோர்டு மற்றும் மவுஸ் பிரச்சனை)</option>
@@ -138,33 +142,39 @@
             <option value="Other">Other (இதர பிரச்சனைகள்)</option>
         </select>
 
-        <label>ELCB / RCCB Availability (இருக்கிறதா?):</label>
-        <select id="elcbStatus" onchange="togglePhotoUpload(this.value)">
+        <!-- 📸 பிரச்சனை ஆன பொருளின் போட்டோ அப்லோடு (கட்டாயம்) -->
+        <label>Upload Faulty Material Photo (பிரச்சனை உள்ள பொருளின் புகைப்படம்)</label>
+        <input type="file" id="materialPhoto" accept="image/*" required>
+
+        <label>ELCB / RCCB Availability (இருக்கிறதா?)</label>
+        <select id="elcbStatus" onchange="togglePhotoUpload(this.value)" required>
             <option value="No">No (இல்லை)</option>
             <option value="Yes">Yes (இருக்கிறது)</option>
         </select>
 
+        <!-- ELCB 'Yes' சொன்னால் மட்டும் இந்த போட்டோ கட்டாயமாகும் -->
         <div id="photoUploadDiv" class="photo-upload-section">
-            <label style="margin-top: 0; color: #b91c1c;">📸 Take & Upload ELCB/RCCB Photo:</label>
+            <label style="margin-top: 0; color: #b91c1c;">📸 Take & Upload ELCB/RCCB Photo</label>
             <input type="file" id="elcbPhoto" accept="image/*">
         </div>
 
-        <label>Earth Condition (எர்த் நிலை):</label>
-        <select id="earthCondition">
+        <label>Earth Condition (எர்த் நிலை)</label>
+        <select id="earthCondition" required>
+            <option value="" disabled selected>-- எர்த் நிலையைத் தேர்ந்தெடுக்கவும் --</option>
             <option value="Good">Good (நன்றாக உள்ளது)</option>
             <option value="Bad">Bad (பழுதாக உள்ளது)</option>
             <option value="Not Available">Not Available (எர்த் வசதி இல்லை)</option>
         </select>
 
-        <label>Grievance Description (விபரம்):</label>
+        <label>Grievance Description (விபரம்)</label>
         <textarea id="description" rows="4" placeholder="பிரச்சனை பற்றிய கூடுதல் விபரம்..." required></textarea>
 
         <button type="submit" class="btn-submit">Submit Ticket to IT Team</button>
     </form>
 
-    <h2>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
+    <h2 style="border-bottom: 2px solid #0f172a;">🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
     
-    <label>Enter Complaint Reference Number:</label>
+    <label style="margin-top: 10px;">Enter Complaint Reference Number</label>
     <input type="text" id="trackId" placeholder="e.g., REG123456">
     
     <button type="button" class="btn-track" onclick="checkStatus()">Check Status</button>
@@ -175,12 +185,14 @@
 <script>
     function togglePhotoUpload(value) {
         const photoDiv = document.getElementById('photoUploadDiv');
+        const elcbInput = document.getElementById('elcbPhoto');
         if (value === 'Yes') {
             photoDiv.style.display = 'block';
-            document.getElementById('elcbPhoto').required = true;
+            elcbInput.required = true;
         } else {
             photoDiv.style.display = 'none';
-            document.getElementById('elcbPhoto').required = false;
+            elcbInput.required = false;
+            elcbInput.value = ""; // க்ளியர் செய்ய
         }
     }
 
