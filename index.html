@@ -5,105 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT ஆதரவு & AMC குறைதீர்ப்பு மையம்</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            background-color: #f3f4f6;
-            color: #333333;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 650px;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            box-sizing: border-box;
-            margin-top: 20px;
-        }
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: 600;
-            color: #374151;
-            font-size: 14px;
-        }
-        label::after {
-            content: " *";
-            color: #ef4444; /* எல்லா லேபிளுக்கும் ரெட் ஸ்டார் காட்டும் */
-        }
-        input[type="text"], select, textarea, input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 6px;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 14px;
-            background-color: #ffffff;
-            color: #000000;
-        }
-        textarea {
-            resize: vertical;
-        }
-        .btn-submit {
-            width: 100%;
-            padding: 12px;
-            background-color: #1d4ed8;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 25px;
-            font-size: 15px;
-        }
-        .btn-submit:hover {
-            background-color: #1e40af;
-        }
-        h2 {
-            font-size: 20px;
-            color: #1e3a8a;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #1d4ed8;
-            padding-bottom: 8px;
-        }
-        .btn-track {
-            width: 100%;
-            padding: 12px;
-            background-color: #0f172a;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 15px;
-        }
-        .btn-track:hover {
-            background-color: #1e293b;
-        }
-        .status-result {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 4px;
-        }
-        .photo-upload-section {
-            display: none;
-            background-color: #fef2f2;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-            border: 1px dashed #ef4444;
-        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f3f4f6; color: #333333; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 650px; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); box-sizing: border-box; margin-top: 20px; }
+        label { display: block; margin-top: 15px; font-weight: 600; color: #374151; font-size: 14px; }
+        label::after { content: " *"; color: #ef4444; }
+        input[type="text"], select, textarea, input[type="file"] { width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box; font-size: 14px; background-color: #ffffff; color: #000000; }
+        textarea { resize: vertical; }
+        .btn-submit { width: 100%; padding: 12px; background-color: #1d4ed8; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 25px; font-size: 15px; }
+        .btn-submit:hover { background-color: #1e40af; }
+        h2 { font-size: 20px; color: #1e3a8a; margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #1d4ed8; padding-bottom: 8px; }
+        .btn-track { width: 100%; padding: 12px; background-color: #0f172a; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; }
+        .btn-track:hover { background-color: #1e293b; }
+        .status-result { display: none; margin-top: 15px; padding: 15px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; }
+        .photo-upload-section { display: none; background-color: #fef2f2; padding: 10px; border-radius: 4px; margin-top: 10px; border: 1px dashed #ef4444; }
     </style>
 </head>
 <body>
@@ -136,13 +50,12 @@
             <option value="Motherboard Issue">Motherboard Issue (மதர்போர்டு பிரச்சனை)</option>
             <option value="Monitor Issue">Monitor Issue (மானிட்டர் / திரை பிரச்சனை)</option>
             <option value="Keyboard and Mouse Problem">Keyboard and Mouse Problem (கீபோர்டு மற்றும் மவுஸ் பிரச்சனை)</option>
-            <option value="SMPS Problem">SMPS Problem (எஸ்.எம்.பி.எஸ் பவர் பாக்ஸ் பிரச்சனை)</option>
+            <option value="SMPS Problem">SMPS Problem (எஸ்.எம்.比.எஸ் பவர் பாக்ஸ் பிரச்சனை)</option>
             <option value="RAM Problem">RAM Problem (ரேம் நினைவகம் பிரச்சனை)</option>
             <option value="Network Issue">Network Issue (நெட்வொர்க் / இன்டர்நெட் பிரச்சனை)</option>
             <option value="Other">Other (இதர பிரச்சனைகள்)</option>
         </select>
 
-        <!-- 📸 பிரச்சனை ஆன பொருளின் போட்டோ அப்லோடு (கட்டாயம்) -->
         <label>Upload Faulty Material Photo (பிரச்சனை உள்ள பொருளின் புகைப்படம்)</label>
         <input type="file" id="materialPhoto" accept="image/*" required>
 
@@ -152,7 +65,6 @@
             <option value="Yes">Yes (இருக்கிறது)</option>
         </select>
 
-        <!-- ELCB 'Yes' சொன்னால் மட்டும் இந்த போட்டோ கட்டாயமாகும் -->
         <div id="photoUploadDiv" class="photo-upload-section">
             <label style="margin-top: 0; color: #b91c1c;">📸 Take & Upload ELCB/RCCB Photo</label>
             <input type="file" id="elcbPhoto" accept="image/*">
@@ -173,12 +85,9 @@
     </form>
 
     <h2 style="border-bottom: 2px solid #0f172a;">🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
-    
     <label style="margin-top: 10px;">Enter Complaint Reference Number</label>
     <input type="text" id="trackId" placeholder="e.g., REG123456">
-    
     <button type="button" class="btn-track" onclick="checkStatus()">Check Status</button>
-
     <div id="statusResult" class="status-result"></div>
 </div>
 
@@ -186,20 +95,35 @@
     function togglePhotoUpload(value) {
         const photoDiv = document.getElementById('photoUploadDiv');
         const elcbInput = document.getElementById('elcbPhoto');
-        if (value === 'Yes') {
-            photoDiv.style.display = 'block';
-            elcbInput.required = true;
-        } else {
-            photoDiv.style.display = 'none';
-            elcbInput.required = false;
-            elcbInput.value = ""; // க்ளியர் செய்ய
-        }
+        if (value === 'Yes') { photoDiv.style.display = 'block'; elcbInput.required = true; } 
+        else { photoDiv.style.display = 'none'; elcbInput.required = false; elcbInput.value = ""; }
     }
 
-    document.getElementById('grievanceForm').addEventListener('submit', function(e) {
+    // போட்டோவை அட்மின் பார்க்க ஏதுவாக மாற்றும் ஃபங்க்ஷன்
+    function convertToBase64(file) {
+        return new Promise((resolve, reject) => {
+            if(!file) resolve("");
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    document.getElementById('grievanceForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
         let ticketId = "REG" + Math.floor(100000 + Math.random() * 900000);
+        
+        // தற்போதைய தேதி மற்றும் நேரம் எடுக்கும்
+        let now = new Date();
+        let formattedDate = now.toLocaleDateString('en-GB') + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+        const materialFile = document.getElementById('materialPhoto').files[0];
+        const elcbFile = document.getElementById('elcbPhoto').files[0];
+
+        let materialPhotoBase64 = await convertToBase64(materialFile);
+        let elcbPhotoBase64 = elcbFile ? await convertToBase64(elcbFile) : "";
         
         let ticketData = {
             id: ticketId,
@@ -207,9 +131,12 @@
             section_name: document.getElementById('sectionName').value,
             designation: document.getElementById('designation').value,
             component: document.getElementById('component').value,
+            material_photo: materialPhotoBase64,
             elcb: document.getElementById('elcbStatus').value,
+            elcb_photo: elcbPhotoBase64,
             earth: document.getElementById('earthCondition').value,
             description: document.getElementById('description').value,
+            date: formattedDate, // தேதி சேமிக்கப்படுகிறது
             status: "Pending"
         };
 
@@ -230,20 +157,15 @@
             let ticket = JSON.parse(localData);
             resultBox.style.display = "block";
             resultBox.innerHTML = `
-                <p style="margin: 6px 0;"><strong>Ticket ID:</strong> ${ticket.id}</p>
-                <p style="margin: 6px 0;"><strong>User Name:</strong> ${ticket.user_name} (${ticket.designation})</p>
-                <p style="margin: 6px 0;"><strong>Section:</strong> ${ticket.section_name}</p>
-                <p style="margin: 6px 0;"><strong>Component:</strong> ${ticket.component}</p>
-                <p style="margin: 6px 0;"><strong>ELCB / Earth:</strong> ${ticket.elcb} / ${ticket.earth}</p>
-                <p style="margin: 6px 0;"><strong>Description:</strong> ${ticket.description}</p>
-                <p style="margin: 6px 0;"><strong>Status:</strong> <span style="background:#b45309; color:white; padding:3px 6px; border-radius:3px; font-weight:bold;">${ticket.status}</span></p>
+                <p><strong>Ticket ID:</strong> ${ticket.id}</p>
+                <p><strong>Date & Time:</strong> ${ticket.date}</p>
+                <p><strong>Status:</strong> <span style="background:#b45309; color:white; padding:3px 6px; border-radius:3px; font-weight:bold;">${ticket.status}</span></p>
             `;
         } else {
-            alert("⚠️ Invalid Reference Number! இந்த புகார் எண் இல்லை அண்ணே.");
+            alert("⚠️ Invalid Reference Number!");
             resultBox.style.display = "none";
         }
     }
 </script>
-
 </body>
 </html>
