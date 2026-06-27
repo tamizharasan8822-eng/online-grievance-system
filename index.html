@@ -50,7 +50,7 @@
             <option value="Motherboard Issue">Motherboard Issue (மதர்போர்டு பிரச்சனை)</option>
             <option value="Monitor Issue">Monitor Issue (மானிட்டர் / திரை பிரச்சனை)</option>
             <option value="Keyboard and Mouse Problem">Keyboard and Mouse Problem (கீபோர்டு மற்றும் மவுஸ் பிரச்சனை)</option>
-            <option value="SMPS Problem">SMPS Problem (எஸ்.எம்.比.எஸ் பவர் பாக்ஸ் பிரச்சனை)</option>
+            <option value="SMPS Problem">SMPS Problem (எஸ்.எம்.பி.எஸ் பவர் பாக்ஸ் பிரச்சனை)</option>
             <option value="RAM Problem">RAM Problem (ரேம் நினைவகம் பிரச்சனை)</option>
             <option value="Network Issue">Network Issue (நெட்வொர்க் / இன்டர்நெட் பிரச்சனை)</option>
             <option value="Other">Other (இதர பிரச்சனைகள்)</option>
@@ -99,7 +99,7 @@
         else { photoDiv.style.display = 'none'; elcbInput.required = false; elcbInput.value = ""; }
     }
 
-    // போட்டோவை அட்மின் பார்க்க ஏதுவாக மாற்றும் ஃபங்க்ஷன்
+    // போட்டோவை மெமரியில் சேமிக்க Base64-ஆக மாற்றும் ஃபங்க்ஷன்
     function convertToBase64(file) {
         return new Promise((resolve, reject) => {
             if(!file) resolve("");
@@ -115,9 +115,13 @@
         
         let ticketId = "REG" + Math.floor(100000 + Math.random() * 900000);
         
-        // தற்போதைய தேதி மற்றும் நேரம் எடுக்கும்
+        // 📅 நாள், மாதம், வருடம் மற்றும் நேரம் கச்சிதமாக எடுக்கும் வடிவம்
         let now = new Date();
-        let formattedDate = now.toLocaleDateString('en-GB') + " " + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        let day = String(now.getDate()).padStart(2, '0');
+        let month = String(now.getMonth() + 1).padStart(2, '0');
+        let year = now.getFullYear();
+        let time = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+        let formattedDate = `${day}-${month}-${year} ${time}`;
 
         const materialFile = document.getElementById('materialPhoto').files[0];
         const elcbFile = document.getElementById('elcbPhoto').files[0];
@@ -136,7 +140,7 @@
             elcb_photo: elcbPhotoBase64,
             earth: document.getElementById('earthCondition').value,
             description: document.getElementById('description').value,
-            date: formattedDate, // தேதி சேமிக்கப்படுகிறது
+            date: formattedDate,
             status: "Pending"
         };
 
