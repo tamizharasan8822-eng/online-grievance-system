@@ -12,7 +12,10 @@
         .container { max-width: 1400px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         h2 { color: #1e3a8a; text-align: center; margin-bottom: 25px; border-bottom: 2px solid #1d4ed8; padding-bottom: 10px; }
         
-        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .filter-section { display: flex; gap: 10px; align-items: center; }
+        .filter-section select { padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-weight: bold; background: white; color: black;}
+        
         .download-btns button { font-weight: bold; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px; font-size: 13px; color: white; }
         .btn-excel { background-color: #16a34a; } .btn-excel:hover { background-color: #15803d; }
         .btn-pdf { background-color: #dc2626; } .btn-pdf:hover { background-color: #b91c1c; }
@@ -23,12 +26,11 @@
         th, td { padding: 12px 15px; text-align: left; border: 1px solid #e5e7eb; font-size: 13px; }
         th { background-color: #f8fafc; color: #1e3a8a; font-weight: 600; }
         tr:hover { background-color: #f1f5f9; }
-        select { padding: 6px; border-radius: 4px; font-weight: bold; border: 1px solid #d1d5db; }
+        .status-select { padding: 6px; border-radius: 4px; font-weight: bold; border: 1px solid #d1d5db; }
         
         .btn-view { background-color: #2563eb; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-view:hover { background-color: #1d4ed8; }
         
-        /* 🖼️ பாப்-அப் விண்டோ ஸ்டைல் */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
         .modal-content { max-width: 80%; max-height: 80%; background: white; padding: 15px; border-radius: 8px; position: relative; text-align: center; }
         .close-btn { position: absolute; top: -12px; right: -12px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; font-size: 16px; }
@@ -40,6 +42,27 @@
     <h2>📊 AMC Complaint Report (Admin Control Panel)</h2>
 
     <div class="action-bar">
+        <!-- 🔍 மாதம் மற்றும் வருடம் ஃபில்டர் பகுதி -->
+        <div class="filter-section">
+            <span style="font-weight: bold; color: #4b5563;">🔍 Filter By:</span>
+            <select id="filterMonth" onchange="loadAdminDashboard()">
+                <option value="All">All Months (அனைத்து மாதங்கள்)</option>
+                <option value="01">January</option> <option value="02">February</option>
+                <option value="03">March</option> <option value="04">April</option>
+                <option value="05">May</option> <option value="06">June</option>
+                <option value="07">July</option> <option value="08">August</option>
+                <option value="09">September</option> <option value="10">October</option>
+                <option value="11">November</option> <option value="12">December</option>
+            </select>
+            
+            <select id="filterYear" onchange="loadAdminDashboard()">
+                <option value="All">All Years (அனைத்து வருடங்கள்)</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+            </select>
+        </div>
+
         <div class="download-btns">
             <button class="btn-excel" onclick="downloadExcel()">📥 Export Excel</button>
             <button class="btn-pdf" onclick="downloadPDF()">📥 Download PDF Report</button>
@@ -67,11 +90,10 @@
     </div>
 </div>
 
-<!-- 🖼️ போட்டோ பார்க்கும் பாப்-அப் பாக்ஸ் -->
 <div id="photoModal" class="modal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal()">X</button>
-        <img id="modalImg" src="" alt="Complaint Material" style="max-width: 100%; max-height: 70vh; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <img id="modalImg" src="" alt="Complaint Material" style="max-width: 100%; max-height: 70vh; border-radius: 4px;">
     </div>
 </div>
 
@@ -81,46 +103,55 @@
     function loadAdminDashboard() {
         const tbody = document.getElementById('adminTableBody');
         tbody.innerHTML = '';
+        
+        let selectedMonth = document.getElementById('filterMonth').value;
+        let selectedYear = document.getElementById('filterYear').value;
+        
         let hasTickets = false;
 
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
             if (key.startsWith('ticket_')) {
-                hasTickets = true;
                 let ticket = JSON.parse(localStorage.getItem(key));
                 
-                let materialPhotoBtn = ticket.material_photo ? `<button class="btn-view" onclick="openModal('${ticket.material_photo}')">📸 View Material</button>` : '<span style="color:#ef4444;">No Photo</span>';
-                let elcbPhotoBtn = ticket.elcb_photo ? `<br><button class="btn-view" style="margin-top:5px; background-color:#10b981;" onclick="openModal('${ticket.elcb_photo}')">📸 View ELCB</button>` : '';
+                // 🔍 ஃபில்டர் லாஜிக்
+                let matchMonth = (selectedMonth === "All" || ticket.rawMonth === selectedMonth);
+                let matchYear = (selectedYear === "All" || ticket.rawYear === selectedYear);
                 
-                // தீர்வு விபரம் இருந்தால் காட்டுவோம், இல்லையென்றால் கோடு காட்டும்
-                let actionTakenText = ticket.action_taken ? `<span style="color: #16a34a; font-weight: 600;">${ticket.action_taken}</span>` : '<span style="color: #9ca3af; font-style: italic;">No Action Logged Yet</span>';
+                if (matchMonth && matchYear) {
+                    hasTickets = true;
+                    
+                    let materialPhotoBtn = ticket.material_photo ? `<button class="btn-view" onclick="openModal('${ticket.material_photo}')">📸 View Material</button>` : '<span style="color:#ef4444;">No Photo</span>';
+                    let elcbPhotoBtn = ticket.elcb_photo ? `<br><button class="btn-view" style="margin-top:5px; background-color:#10b981;" onclick="openModal('${ticket.elcb_photo}')">📸 View ELCB</button>` : '';
+                    let actionTakenText = ticket.action_taken ? `<span style="color: #16a34a; font-weight: 600;">${ticket.action_taken}</span>` : '<span style="color: #9ca3af; font-style: italic;">No Action Logged Yet</span>';
 
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="color: #4b5563; font-weight: 500; white-space: nowrap;">${ticket.date || 'N/A'}</td>
-                        <td><strong style="color: #1d4ed8;">${ticket.id}</strong></td>
-                        <td><strong>${ticket.user_name}</strong><br><span style="color: #6b7280; font-size: 11px;">${ticket.designation}</span></td>
-                        <td>${ticket.section_name}</td>
-                        <td><span style="color: #b45309; font-weight: 500;">${ticket.component}</span></td>
-                        <td>${materialPhotoBtn}</td>
-                        <td>
-                            <strong>ELCB:</strong> ${ticket.elcb} ${elcbPhotoBtn}<br>
-                            <strong>Earth:</strong> ${ticket.earth}
-                        </td>
-                        <td>
-                            <select onchange="updateTicketStatus('${ticket.id}', this.value)">
-                                <option value="Pending" ${ticket.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                <option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                                <option value="Resolved & Closed" ${ticket.status === 'Resolved & Closed' ? 'selected' : ''}>Resolved & Closed</option>
-                            </select>
-                        </td>
-                        <td>${actionTakenText}</td>
-                    </tr>
-                `;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="color: #4b5563; font-weight: 500; white-space: nowrap;">${ticket.date || 'N/A'}</td>
+                            <td><strong style="color: #1d4ed8;">${ticket.id}</strong></td>
+                            <td><strong>${ticket.user_name}</strong><br><span style="color: #6b7280; font-size: 11px;">${ticket.designation}</span></td>
+                            <td>${ticket.section_name}</td>
+                            <td><span style="color: #b45309; font-weight: 500;">${ticket.component}</span></td>
+                            <td>${materialPhotoBtn}</td>
+                            <td>
+                                <strong>ELCB:</strong> ${ticket.elcb} ${elcbPhotoBtn}<br>
+                                <strong>Earth:</strong> ${ticket.earth}
+                            </td>
+                            <td>
+                                <select class="status-select" onchange="updateTicketStatus('${ticket.id}', this.value)">
+                                    <option value="Pending" ${ticket.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                    <option value="Resolved & Closed" ${ticket.status === 'Resolved & Closed' ? 'selected' : ''}>Resolved & Closed</option>
+                                </select>
+                            </td>
+                            <td>${actionTakenText}</td>
+                        </tr>
+                    `;
+                }
             }
         }
         if (!hasTickets) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:#6b7280; font-weight:bold;">⚠️ புகார்கள் எதுவும் இல்லை அண்ணே! புது கம்ப்ளெய்ன்ட் பதிவிட்டு பார்க்கவும்.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:#6b7280; font-weight:bold;">⚠️ இந்த ஃபில்டரில் புகார்கள் எதுவும் இல்லை அண்ணே!</td></tr>`;
         }
     }
 
@@ -131,15 +162,14 @@
         if (ticket) {
             ticket.status = newStatus;
             
-            // நிலைமை "Resolved & Closed" என மாறும்போது மட்டும் என்ன வேலை செய்யப்பட்டது என்று கேட்கும் பாக்ஸ் வரும்
             if (newStatus === "Resolved & Closed") {
                 let action = prompt("👨‍💻 இந்த புகாரை க்ளோஸ் செய்வதற்கு நீங்கள் என்ன நடவடிக்கை எடுத்தீர்கள்? (விளக்கம் எழுதவும்):");
                 if (action === null || action.trim() === "") {
                     alert("⚠️ க்ளோஸ் செய்ய தீர்வு விபரம் கட்டாயம் எழுத வேண்டும் அண்ணே!");
-                    loadAdminDashboard(); // ரீலோடு செய்து பழைய ஸ்டேட்டஸுக்கே கொண்டு போகும்
+                    loadAdminDashboard();
                     return;
                 }
-                ticket.action_taken = action; // விபரத்தை சேமிக்கிறது
+                ticket.action_taken = action;
             }
 
             localStorage.setItem(key, JSON.stringify(ticket));
@@ -153,9 +183,7 @@
         document.getElementById('photoModal').style.display = 'flex';
     }
 
-    function closeModal() {
-        document.getElementById('photoModal').style.display = 'none';
-    }
+    function closeModal() { document.getElementById('photoModal').style.display = 'none'; }
 
     function downloadExcel() {
         let table = document.getElementById("reportTable");
