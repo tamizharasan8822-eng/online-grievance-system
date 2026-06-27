@@ -4,33 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMC Complaint Report - Admin Panel</title>
+    <!-- PDF மற்றும் Excel டவுன்லோடு செய்யத் தேவையான ஆன்லைன் லைப்ரரிகள் -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f3f4f6; color: #333333; padding: 20px; }
         .container { max-width: 1300px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         h2 { color: #1e3a8a; text-align: center; margin-bottom: 25px; border-bottom: 2px solid #1d4ed8; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #ffffff; }
-        th, td { padding: 12px 15px; text-align: left; border: 1px solid #e5e7eb; font-size: 14px; }
+        
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .download-btns button { font-weight: bold; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px; font-size: 13px; color: white; }
+        .btn-excel { background-color: #16a34a; } .btn-excel:hover { background-color: #15803d; }
+        .btn-pdf { background-color: #dc2626; } .btn-pdf:hover { background-color: #b91c1c; }
+        .btn-clear { background-color: #4b5563; font-weight: bold; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; color: white; font-size: 13px; }
+        .btn-clear:hover { background-color: #374151; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #ffffff; }
+        th, td { padding: 12px 15px; text-align: left; border: 1px solid #e5e7eb; font-size: 13px; }
         th { background-color: #f8fafc; color: #1e3a8a; font-weight: 600; }
         tr:hover { background-color: #f1f5f9; }
         select { padding: 6px; border-radius: 4px; font-weight: bold; border: 1px solid #d1d5db; }
-        .btn-view { background-color: #10b981; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .btn-view:hover { background-color: #059669; }
-        .btn-clear { background-color: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; float: right; }
         
-        /* 🖼️ போட்டோ பார்க்கும் பாப்-அப் விண்டோ ஸ்டைல் */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
-        .modal-content { max-width: 80%; max-height: 80%; background: white; padding: 10px; border-radius: 8px; position: relative; }
-        .close-btn { position: absolute; top: -10px; right: -10px; background: red; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; }
+        .btn-view { background-color: #2563eb; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-view:hover { background-color: #1d4ed8; }
+        
+        /* 🖼️ பாப்-அப் விண்டோ ஸ்டைல் */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { max-width: 80%; max-height: 80%; background: white; padding: 15px; border-radius: 8px; position: relative; text-align: center; }
+        .close-btn { position: absolute; top: -12px; right: -12px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; font-size: 16px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <button class="btn-clear" onclick="clearAllTickets()">Clear All Records</button>
     <h2>📊 AMC Complaint Report (Admin Control Panel)</h2>
+
+    <div class="action-bar">
+        <div class="download-btns">
+            <button class="btn-excel" onclick="downloadExcel()">📥 Export Excel</button>
+            <button class="btn-pdf" onclick="downloadPDF()">📥 Download PDF Report</button>
+        </div>
+        <button class="btn-clear" onclick="clearAllTickets()">🧹 Clear All Records</button>
+    </div>
     
-    <div style="overflow-x: auto;">
-        <table>
+    <div style="overflow-x: auto;" id="pdfArea">
+        <table id="reportTable">
             <thead>
                 <tr>
                     <th>தேதி & நேரம்</th>
@@ -48,11 +67,11 @@
     </div>
 </div>
 
-<!-- 🖼️ போட்டோக்களைப் பெரியதாகக் காட்டும் பாப்-அப் பாக்ஸ் -->
+<!-- 🖼️ போட்டோ பார்க்கும் பாப்-அப் பாக்ஸ் -->
 <div id="photoModal" class="modal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal()">X</button>
-        <img id="modalImg" src="" alt="Material Photo" style="max-width: 100%; max-height: 70vh; display: block; margin: 0 auto;">
+        <img id="modalImg" src="" alt="Complaint Material" style="max-width: 100%; max-height: 70vh; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
     </div>
 </div>
 
@@ -70,19 +89,17 @@
                 hasTickets = true;
                 let ticket = JSON.parse(localStorage.getItem(key));
                 
-                // ELCB போட்டோ இருந்தால் மட்டும் பட்டன் காட்டும்
-                let elcbPhotoBtn = ticket.elcb_photo ? `<br><button class="btn-view" onclick="openModal('${ticket.elcb_photo}')">View ELCB Photo</button>` : '';
+                let materialPhotoBtn = ticket.material_photo ? `<button class="btn-view" onclick="openModal('${ticket.material_photo}')">📸 View Material</button>` : '<span style="color:#ef4444;">No Photo</span>';
+                let elcbPhotoBtn = ticket.elcb_photo ? `<br><button class="btn-view" style="margin-top:5px; background-color:#10b981;" onclick="openModal('${ticket.elcb_photo}')">📸 View ELCB</button>` : '';
 
                 tbody.innerHTML += `
                     <tr>
-                        <td style="color: #6b7280; font-weight: 500;">${ticket.date || 'N/A'}</td>
+                        <td style="color: #4b5563; font-weight: 500; white-space: nowrap;">${ticket.date || 'N/A'}</td>
                         <td><strong style="color: #1d4ed8;">${ticket.id}</strong></td>
-                        <td><strong>${ticket.user_name}</strong><br><span style="color: #6b7280; font-size: 12px;">${ticket.designation}</span></td>
+                        <td><strong>${ticket.user_name}</strong><br><span style="color: #6b7280; font-size: 11px;">${ticket.designation}</span></td>
                         <td>${ticket.section_name}</td>
                         <td><span style="color: #b45309; font-weight: 500;">${ticket.component}</span></td>
-                        <td>
-                            <button class="btn-view" onclick="openModal('${ticket.material_photo}')">📸 View Material</button>
-                        </td>
+                        <td>${materialPhotoBtn}</td>
                         <td>
                             <strong>ELCB:</strong> ${ticket.elcb} ${elcbPhotoBtn}<br>
                             <strong>Earth:</strong> ${ticket.earth}
@@ -99,7 +116,7 @@
             }
         }
         if (!hasTickets) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#6b7280;">⚠️ புகார்கள் எதுவும் இல்லை அண்ணே!</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#6b7280; font-weight:bold;">⚠️ புகார்கள் எதுவும் இல்லை அண்ணே! புது கம்ப்ளெய்ன்ட் பதிவிட்டு பார்க்கவும்.</td></tr>`;
         }
     }
 
@@ -113,9 +130,8 @@
         }
     }
 
-    // 🖼️ போட்டோக்களை பாப்-அப்பில் ஓபன் செய்யும் ஃபங்க்ஷன்
     function openModal(base64Src) {
-        if(!base64Src) { alert("போட்டோ எதுவும் அப்லோடு செய்யப்படவில்லை அண்ணே!"); return; }
+        if(!base64Src || base64Src === "undefined") { alert("போட்டோ எதுவும் இல்லை அண்ணே!"); return; }
         document.getElementById('modalImg').src = base64Src;
         document.getElementById('photoModal').style.display = 'flex';
     }
@@ -124,8 +140,28 @@
         document.getElementById('photoModal').style.display = 'none';
     }
 
+    // 📥 EXCEL டவுன்லோட் செய்யும் வசதி
+    function downloadExcel() {
+        let table = document.getElementById("reportTable");
+        let wb = XLSX.utils.table_to_book(table, {sheet: "AMC Complaints"});
+        XLSX.writeFile(wb, "AMC_Complaint_Report.xlsx");
+    }
+
+    // 📥 PDF டவுன்லோட் செய்யும் வசதி
+    function downloadPDF() {
+        let element = document.getElementById('pdfArea');
+        let opt = {
+            margin:       10,
+            filename:     'AMC_Complaint_Report.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a3', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
     function clearAllTickets() {
-        if (confirm("அனைத்து புகார்களையும் நீக்கலாமா?")) {
+        if (confirm("அனைத்து புகார்களையும் முழுமையாக நீக்கலாமா அண்ணே?")) {
             let keys = [];
             for (let i = 0; i < localStorage.length; i++) {
                 if (localStorage.key(i).startsWith('ticket_')) keys.push(localStorage.key(i));
