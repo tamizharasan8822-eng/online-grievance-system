@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC Complaint Report - Original ID Panel</title>
+    <title>AMC Complaint Report - Master Admin Panel</title>
+    <!-- PDF டவுன்லோட் செய்யத் தேவையான லைப்ரரிகள் -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
@@ -13,17 +14,23 @@
         .subtitle { text-align: center; color: #94a3b8; font-size: 16px; margin-bottom: 25px; }
         .filter-bar { display: flex; gap: 15px; justify-content: center; align-items: center; margin-bottom: 25px; background: #0f172a; padding: 15px; border-radius: 8px; flex-wrap: wrap; }
         .filter-bar select { padding: 10px 15px; background: #1e293b; color: white; border: 1px solid #475569; border-radius: 6px; font-size: 14px; }
-        .btn-sync { background-color: #38bdf8; color: #0f172a; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        .btn-pdf { background-color: #10b981; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .btn-sync { background-color: #38bdf8; color: #0f172a; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .btn-sync:hover { background-color: #0ea5e9; }
+        .btn-pdf { background-color: #10b981; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .btn-pdf:hover { background-color: #059669; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         th, td { padding: 14px; text-align: left; border: 1px solid #334155; font-size: 14px; }
-        th { background-color: #0f172a; color: #38bdf8; }
+        th { background-color: #0f172a; color: #38bdf8; font-weight: 600; }
         tr:hover { background-color: #243249; }
+        
+        /* 🎨 நிலையை மாற்றும் செலக்ட் பாக்ஸ் ஸ்டைல் */
         .status-select { padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; color: white; border: none; cursor: pointer; outline: none; }
         .status-pending { background-color: #b45309; }
         .status-progress { background-color: #0284c7; }
         .status-closed { background-color: #047857; }
+
         .btn-delete { background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight: bold; }
+        .btn-delete:hover { background:#dc2626; }
     </style>
 </head>
 <body>
@@ -33,7 +40,7 @@
     <div class="subtitle">உண்மையான புகார் எண்களுடன் கூடிய லைவ் அட்மின் தளம்:</div>
     
     <div class="filter-bar">
-        <label>மாதம்:</label>
+        <label>மாதம் (Month):</label>
         <select id="monthFilter" onchange="filterData()">
             <option value="all" selected>All Months</option>
             <option value="01">January</option><option value="02">February</option>
@@ -44,11 +51,12 @@
             <option value="11">November</option><option value="12">December</option>
         </select>
 
-        <label>வருடம்:</label>
+        <label>வருடம் (Year):</label>
         <select id="yearFilter" onchange="filterData()">
             <option value="all" selected>All Years</option>
             <option value="2026">2026</option>
             <option value="2025">2025</option>
+            <option value="2024">2024</option>
         </select>
 
         <button class="btn-sync" onclick="loadComplaints()">🔄 Force Refresh Database</button>
@@ -69,7 +77,7 @@
             </tr>
         </thead>
         <tbody id="complaintTableBody">
-            <!-- டேட்டா லோடிங் -->
+            <!-- டேட்டா இங்கே லோடு ஆகும் -->
         </tbody>
     </table>
 </div>
@@ -91,7 +99,7 @@
             if (response.ok) {
                 const cloudData = await response.json();
                 
-                // 🛑 ஐடி மாறாமல் தடுக்க, சர்வர் தரும் அதே ஒரிஜினல் ஐடியை மட்டும் வச்சு டூப்ளிகேட் ஃபில்டர் பண்றோம் அண்ணே!
+                // 🛑 உண்மையான ஐடி மாறாமல் தடுக்க துல்லியமான மேப் ஃபில்டர் அண்ணே!
                 let uniqueMap = new Map();
                 cloudData.forEach(item => {
                     let originalId = item.id || item.ticketId || item.ticket_id || '';
@@ -106,17 +114,17 @@
                 globalComplaintsData = [];
             }
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching data:", error);
             globalComplaintsData = [];
         }
 
-        // ஐடி வரிசைப்படி மேலிருந்து கீழாக அடுக்குகிறது
+        // ஐடி வரிசைப்படி பெரிய எண்கள் மேலே வரும்படி வரிசைப்படுத்துகிறது
         globalComplaintsData.sort((a,b) => {
             let idA = parseInt(String(a.id).replace('EB','')) || 0;
             let idB = parseInt(String(b.id).replace('EB','')) || 0;
             return idB - idA;
         });
-        
+
         filterData();
     }
 
@@ -147,11 +155,12 @@
         }
 
         filtered.forEach(ticket => {
-            // 🛠️ இதோ ஒரிஜினல் ஐடியை அப்படியே பிரிண்ட் செய்யுது அண்ணே!
+            // ஒரிஜினல் ஐடி டிஸ்பிளே லாஜிக்
             let rawId = ticket.id || ticket.ticketId || '';
             let idDisplay = String(rawId).startsWith('EB') ? rawId : `EB${rawId}`;
             
             let name = ticket.staff_name || ticket.employeeName || 'Dinesh (A.E)';
+            
             let section = ticket.section_name || ticket.sectionName || 'North Section';
             if(!section || section === 'N/A') section = 'North Section';
 
@@ -169,8 +178,8 @@
             }
             if(!cleanDesc) cleanDesc = rawDesc;
             
-            // ஒருவேளை இது உங்க ஒரிஜினல் டிக்கெட்டான 'CRT Monitor issue' ஆக இருந்தால் கம்போனென்ட்டை அக்யூரெட்டா மாத்துது
-            if(cleanDesc.toLowerCase().includes('crt monitor') || component === 'N/A') {
+            // ஒருவேளை மானிட்டர் பிரச்சனையாக இருந்தால் கம்போனென்ட்டை அக்யூரெட்டா மாத்துது
+            if(cleanDesc.toLowerCase().includes('monitor') || component === 'N/A') {
                 component = "Computer / Monitor Issue";
             }
 
@@ -190,6 +199,7 @@
                     <td>${cleanDesc}</td>
                     <td>${dateStr}</td>
                     <td>
+                        <!-- 🔄 நிலையை மாற்றும் லைவ் செலக்ட் பாக்ஸ் அண்ணே! -->
                         <select class="status-select ${bgClass}" onchange="updateStatusToServer('${rawId}', this.value, this)">
                             <option value="Pending" ${currentStatus === 'Pending' ? 'selected' : ''}>Pending</option>
                             <option value="In Progress" ${currentStatus === 'In Progress' ? 'selected' : ''}>In Progress</option>
@@ -202,36 +212,66 @@
         });
     }
 
+    // 🚀 நிலையை ஆன்லைன் சர்வருக்கு அனுப்பி அப்டேட் செய்யும் மல்டி-ரூட் ஃபங்க்ஷன் அண்ணே!
     async function updateStatusToServer(ticketId, newStatus, selectElement) {
         selectElement.className = "status-select";
         if(newStatus === 'Pending') selectElement.classList.add('status-pending');
         if(newStatus === 'In Progress') selectElement.classList.add('status-progress');
         if(newStatus === 'Resolved & Closed') selectElement.classList.add('status-closed');
 
+        let cleanNumericId = String(ticketId).replace('EB', '').trim();
+        let success = false;
+
         try {
-            const response = await fetch(`${API_BASE_URL}/complaints/${ticketId}`, {
+            // முறை 1: ஒரிஜினல் டிக்கெட் ஐடி கொண்டு PUT ரெக்வஸ்ட்
+            let response = await fetch(`${API_BASE_URL}/complaints/${ticketId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus })
             });
+            if (response.ok) success = true;
 
-            if(response.ok) {
-                alert(`⚡ Ticket EB${ticketId} Updated to "${newStatus}"!`);
-            } else {
-                alert("ஸ்டேட்டஸ் மாறல அண்ணே! மீண்டும் முயற்சிக்கவும்.");
+            // முறை 2: வெறும் எண்களை (Numeric ID) மட்டும் வைத்து முயற்சிக்கும்
+            if (!success) {
+                let responseNumeric = await fetch(`${API_BASE_URL}/complaints/${cleanNumericId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (responseNumeric.ok) success = true;
             }
+
+            // முறை 3: பொதுவான POST / UPDATE ரூட்
+            if (!success) {
+                let responsePost = await fetch(`${API_BASE_URL}/complaints`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: ticketId, status: newStatus })
+                });
+                if (responsePost.ok) success = true;
+            }
+
+            if (success) {
+                console.log(`✅ Ticket ${ticketId} status changed to ${newStatus}`);
+            } else {
+                alert("⚠️ சர்வரில் ஸ்டேட்டஸ் மாறவில்லை. லோக்கல் பக்கத்தில் மட்டும் மாற்றப்பட்டுள்ளது!");
+            }
+
         } catch (error) {
-            alert("நெட்வொர்க் எரர்!");
+            console.error("Error updating status:", error);
+            alert("❌ நெட்வொர்க் எரர்! சர்வர் ஆஃப்லைனில் இருக்கலாம் அண்ணே.");
         }
     }
 
     function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4');
-        doc.text("AMC Complaint Report", 14, 15);
+        doc.setFontSize(18);
+        doc.text("AMC Grievance System - Admin Complaint Report", 14, 15);
         
         const tableRows = [];
         const rows = document.querySelectorAll("#complaintTableBody tr");
+        
         rows.forEach(row => {
             const rowData = [];
             const cols = row.querySelectorAll("td");
@@ -251,13 +291,14 @@
             head: [['Ticket ID', 'Staff Details', 'Section Name', 'Component', 'Description', 'Date', 'Status']],
             body: tableRows,
             startY: 28,
-            theme: 'grid'
+            theme: 'grid',
+            headStyles: { fillColor: [15, 23, 42], textColor: [56, 189, 248] }
         });
-        doc.save(`AMC_Report.pdf`);
+        doc.save(`AMC_Master_Report.pdf`);
     }
 
     function deleteItem(id) {
-        if(confirm("நீக்கலாமா?")) {
+        if(confirm("இந்த புகாரை நீக்கலாமா அண்ணே?")) {
             globalComplaintsData = globalComplaintsData.filter(t => String(t.id) !== String(id));
             filterData();
         }
