@@ -13,7 +13,7 @@
         textarea { resize: vertical; }
         .btn-submit { width: 100%; padding: 12px; background-color: #1d4ed8; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 25px; font-size: 15px; }
         .btn-submit:hover { background-color: #1e40af; }
-        h2 { font-size: 20px; color: #1e3a8a; margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #1d4ed8; padding-bottom: 8px; }
+        h2 { font-size: 22px; color: #1e3a8a; margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #1d4ed8; padding-bottom: 8px; }
         .btn-track { width: 100%; padding: 12px; background-color: #0f172a; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 15px; }
         .btn-track:hover { background-color: #1e293b; }
         .status-result { display: none; margin-top: 15px; padding: 15px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; }
@@ -23,8 +23,8 @@
 <body>
 
 <div class="container">
-    <h2 style="margin-top: 0; text-align: center; border-bottom: none;">💻 IT ஆதரவு & AMC குறைதீர்ப்பு மையம்</h2>
-    <p style="text-align: center; color: #6b7280; font-size: 13px; margin-top: -10px;">IT Support & AMC Grievance Management</p>
+    <!-- 👑 மெயின் தலைப்பு மாற்றப்பட்டுள்ளது -->
+    <h2 style="margin-top: 0; text-align: center; border-bottom: none; font-size: 24px;">💻 IT Support & AMC Grievance Management</h2>
 
     <form id="grievanceForm">
         <label>User Name (புகார் அளிப்பவர் பெயர்)</label>
@@ -50,7 +50,7 @@
             <option value="Motherboard Issue">Motherboard Issue (மதர்போர்டு பிரச்சனை)</option>
             <option value="Monitor Issue">Monitor Issue (மானிட்டர் / திரை பிரச்சனை)</option>
             <option value="Keyboard and Mouse Problem">Keyboard and Mouse Problem (கீபோர்டு மற்றும் மவுஸ் பிரச்சனை)</option>
-            <option value="SMPS Problem">SMPS Problem (எஸ்.எம்.பி.எஸ் பவர் பாக்ஸ் பிரச்சனை)</option>
+            <option value="SMPS Problem">SMPS Problem (எஸ்.எம்.比.எஸ் பவர் பாக்ஸ் பிரச்சனை)</option>
             <option value="RAM Problem">RAM Problem (ரேம் நினைவகம் பிரச்சனை)</option>
             <option value="Network Issue">Network Issue (நெட்வொர்க் / இன்டர்நெட் பிரச்சனை)</option>
             <option value="Other">Other (இதர பிரச்சனைகள்)</option>
@@ -139,10 +139,10 @@
             earth: document.getElementById('earthCondition').value,
             description: document.getElementById('description').value,
             date: formattedDate,
-            rawMonth: month, // ஃபில்டருக்காக மாதம் சேமிக்கப்படுகிறது
-            rawYear: String(year), // ஃபில்டருக்காக வருடம் சேமிக்கப்படுகிறது
+            rawMonth: month,
+            rawYear: String(year),
             status: "Pending",
-            action_taken: "" // தொடக்கத்தில் காலியாக இருக்கும்
+            action_taken: ""
         };
 
         localStorage.setItem(`ticket_${ticketId}`, JSON.stringify(ticketData));
@@ -162,7 +162,6 @@
             let ticket = JSON.parse(localData);
             resultBox.style.display = "block";
             
-            // அட்மின் நடவடிக்கை எடுத்திருந்தால் அதை காட்டுவதற்கான கோடு
             let clientActionText = ticket.action_taken ? 
                 `<p style="margin: 8px 0; color:#16a34a;"><strong>👨‍💻 IT Team Action Taken (நடவடிக்கை விபரம்):</strong> ${ticket.action_taken}</p>` : 
                 `<p style="margin: 8px 0; color:#6b7280; font-style:italic;"><strong>👨‍💻 IT Team Action Taken:</strong> Waiting for IT technician update...</p>`;
