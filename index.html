@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Support & Hardware Grievance</title>
+    <title>IT ஆதரவு & AMC குறைதீர்ப்பு மையம்</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
-            background-color: #f3f4f6; /* லைட் கிரே பேக்கிரவுண்ட் */
+            background-color: #f3f4f6;
             color: #333333;
             padding: 20px;
             display: flex;
@@ -18,7 +18,7 @@
         .container {
             width: 100%;
             max-width: 650px;
-            background: #ffffff; /* வெள்ளை நிற பாக்ஸ் */
+            background: #ffffff;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -49,7 +49,7 @@
         .btn-submit {
             width: 100%;
             padding: 12px;
-            background-color: #1d4ed8; /* நீல நிற சப்மிட் பட்டன் */
+            background-color: #1d4ed8;
             color: white;
             border: none;
             border-radius: 4px;
@@ -72,7 +72,7 @@
         .btn-track {
             width: 100%;
             padding: 12px;
-            background-color: #0f172a; /* கருப்பு நிற டிராக் பட்டன் */
+            background-color: #0f172a;
             color: white;
             border: none;
             border-radius: 4px;
@@ -93,7 +93,7 @@
             border-radius: 4px;
         }
         .photo-upload-section {
-            display: none; /* ஆரம்பத்தில் மறைந்திருக்கும் */
+            display: none;
             background-color: #fef2f2;
             padding: 10px;
             border-radius: 4px;
@@ -105,8 +105,11 @@
 <body>
 
 <div class="container">
+    <!-- 🏢 தலைப்பு (உங்களுக்குப் பிடிச்சதை வெச்சுக்கலாம் அண்ணே) -->
+    <h2 style="margin-top: 0; text-align: center; border-bottom: none;">💻 IT ஆதரவு & AMC குறைதீர்ப்பு மையம்</h2>
+    <p style="text-align: center; color: #6b7280; font-size: 13px; margin-top: -10px;">IT Support & AMC Grievance Management</p>
+
     <form id="grievanceForm">
-        <!-- 👤 பயனர் விபரங்கள் -->
         <label>User Name (புகார் அளிப்பவர் பெயர்):</label>
         <input type="text" id="userName" placeholder="உங்க பெயர் எழுதவும்" required>
 
@@ -123,26 +126,24 @@
             <option value="Gangman">Gangman</option>
         </select>
 
-        <!-- 🛠️ ஹார்டுவேர் பிரச்சனைகள் லிஸ்ட் -->
-        <label>Select Faulty Component (பிரச்சனை):</label>
+        <!-- 🛠️ தமிழ் மற்றும் ஆங்கிலம் கலந்த பிரச்சனைகள் லிஸ்ட் -->
+        <label>Select Faulty Component (பிரச்சனை உள்ள பாகம்):</label>
         <select id="component">
-            <option value="Motherboard Issue">Motherboard Issue</option>
-            <option value="Monitor Issue">Monitor Issue</option>
-            <option value="Keyboard and Mouse Problem">Keyboard and Mouse Problem</option>
-            <option value="SMPS Problem">SMPS Problem</option>
-            <option value="RAM Problem">RAM Problem</option>
-            <option value="Network Issue">Network Issue</option>
+            <option value="Motherboard Issue">Motherboard Issue (மதர்போர்டு பிரச்சனை)</option>
+            <option value="Monitor Issue">Monitor Issue (மானிட்டர் / திரை பிரச்சனை)</option>
+            <option value="Keyboard and Mouse Problem">Keyboard and Mouse Problem (கீபோர்டு மற்றும் மவுஸ் பிரச்சனை)</option>
+            <option value="SMPS Problem">SMPS Problem (எஸ்.எம்.பி.எஸ் பவர் பாக்ஸ் பிரச்சனை)</option>
+            <option value="RAM Problem">RAM Problem (ரேம் நினைவகம் பிரச்சனை)</option>
+            <option value="Network Issue">Network Issue (நெட்வொர்க் / இன்டர்நெட் பிரச்சனை)</option>
             <option value="Other">Other (இதர பிரச்சனைகள்)</option>
         </select>
 
-        <!-- ⚡ எலக்ட்ரிகல் கண்டிஷன்கள் -->
         <label>ELCB / RCCB Availability (இருக்கிறதா?):</label>
         <select id="elcbStatus" onchange="togglePhotoUpload(this.value)">
             <option value="No">No (இல்லை)</option>
             <option value="Yes">Yes (இருக்கிறது)</option>
         </select>
 
-        <!-- 📸 'Yes' என்று சொன்னால் மட்டும் காட்டும் போட்டோ அப்லோடு ஆப்ஷன் -->
         <div id="photoUploadDiv" class="photo-upload-section">
             <label style="margin-top: 0; color: #b91c1c;">📸 Take & Upload ELCB/RCCB Photo:</label>
             <input type="file" id="elcbPhoto" accept="image/*">
@@ -155,14 +156,12 @@
             <option value="Not Available">Not Available (எர்த் வசதி இல்லை)</option>
         </select>
 
-        <!-- 📝 டிஸ்கிரிப்ஷன் -->
         <label>Grievance Description (விபரம்):</label>
         <textarea id="description" rows="4" placeholder="பிரச்சனை பற்றிய கூடுதல் விபரம்..." required></textarea>
 
         <button type="submit" class="btn-submit">Submit Ticket to IT Team</button>
     </form>
 
-    <!-- 🔍 டிராக் செய்யும் பகுதி -->
     <h2>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
     
     <label>Enter Complaint Reference Number:</label>
@@ -174,7 +173,6 @@
 </div>
 
 <script>
-    // 📸 ELCB 'Yes' சொன்னா போட்டோ பாக்ஸ் காட்டும் லாஜிக்
     function togglePhotoUpload(value) {
         const photoDiv = document.getElementById('photoUploadDiv');
         if (value === 'Yes') {
@@ -186,11 +184,10 @@
         }
     }
 
-    // 🚀 லோக்கல் மெமரியில் சேமிக்கும் சப்மிட் ஃபங்க்ஷன்
     document.getElementById('grievanceForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        let ticketId = "REG" + Math.floor(100000 + Math.random() * 900000); // ரேண்டம் ஐடி உருவாக்குகிறது
+        let ticketId = "REG" + Math.floor(100000 + Math.random() * 900000);
         
         let ticketData = {
             id: ticketId,
@@ -204,7 +201,6 @@
             status: "Pending"
         };
 
-        // லோக்கலில் பத்திரமாகச் சேமிக்கும் (சர்வர் எரர் வராது)
         localStorage.setItem(`ticket_${ticketId}`, JSON.stringify(ticketData));
         
         alert(`⚡ Ticket Created Successfully!\nYour Reference Number: ${ticketId}`);
@@ -213,7 +209,6 @@
         document.getElementById('photoUploadDiv').style.display = 'none';
     });
 
-    // 🔍 ஸ்டேட்டஸ் டிராக்கிங் லாஜிக்
     function checkStatus() {
         let inputId = document.getElementById('trackId').value.trim().toUpperCase();
         let resultBox = document.getElementById('statusResult');
