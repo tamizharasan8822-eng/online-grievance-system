@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMC Complaint Report - Admin Panel</title>
-    <!-- PDF மற்றும் Excel டவுன்லோடு செய்யத் தேவையான ஆன்லைன் லைப்ரரிகள் -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f3f4f6; color: #333333; padding: 20px; }
-        .container { max-width: 1300px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .container { max-width: 1400px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         h2 { color: #1e3a8a; text-align: center; margin-bottom: 25px; border-bottom: 2px solid #1d4ed8; padding-bottom: 10px; }
         
         .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
@@ -60,6 +59,7 @@
                     <th>பொருள் போட்டோ</th>
                     <th>ELCB / எர்த்</th>
                     <th>நிலை (Status)</th>
+                    <th>தீர்வு விபரம் (Action Taken)</th>
                 </tr>
             </thead>
             <tbody id="adminTableBody"></tbody>
@@ -91,6 +91,9 @@
                 
                 let materialPhotoBtn = ticket.material_photo ? `<button class="btn-view" onclick="openModal('${ticket.material_photo}')">📸 View Material</button>` : '<span style="color:#ef4444;">No Photo</span>';
                 let elcbPhotoBtn = ticket.elcb_photo ? `<br><button class="btn-view" style="margin-top:5px; background-color:#10b981;" onclick="openModal('${ticket.elcb_photo}')">📸 View ELCB</button>` : '';
+                
+                // தீர்வு விபரம் இருந்தால் காட்டுவோம், இல்லையென்றால் கோடு காட்டும்
+                let actionTakenText = ticket.action_taken ? `<span style="color: #16a34a; font-weight: 600;">${ticket.action_taken}</span>` : '<span style="color: #9ca3af; font-style: italic;">No Action Logged Yet</span>';
 
                 tbody.innerHTML += `
                     <tr>
@@ -111,20 +114,34 @@
                                 <option value="Resolved & Closed" ${ticket.status === 'Resolved & Closed' ? 'selected' : ''}>Resolved & Closed</option>
                             </select>
                         </td>
+                        <td>${actionTakenText}</td>
                     </tr>
                 `;
             }
         }
         if (!hasTickets) {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#6b7280; font-weight:bold;">⚠️ புகார்கள் எதுவும் இல்லை அண்ணே! புது கம்ப்ளெய்ன்ட் பதிவிட்டு பார்க்கவும்.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:#6b7280; font-weight:bold;">⚠️ புகார்கள் எதுவும் இல்லை அண்ணே! புது கம்ப்ளெய்ன்ட் பதிவிட்டு பார்க்கவும்.</td></tr>`;
         }
     }
 
     function updateTicketStatus(ticketId, newStatus) {
         let key = `ticket_${ticketId}`;
         let ticket = JSON.parse(localStorage.getItem(key));
+        
         if (ticket) {
             ticket.status = newStatus;
+            
+            // நிலைமை "Resolved & Closed" என மாறும்போது மட்டும் என்ன வேலை செய்யப்பட்டது என்று கேட்கும் பாக்ஸ் வரும்
+            if (newStatus === "Resolved & Closed") {
+                let action = prompt("👨‍💻 இந்த புகாரை க்ளோஸ் செய்வதற்கு நீங்கள் என்ன நடவடிக்கை எடுத்தீர்கள்? (விளக்கம் எழுதவும்):");
+                if (action === null || action.trim() === "") {
+                    alert("⚠️ க்ளோஸ் செய்ய தீர்வு விபரம் கட்டாயம் எழுத வேண்டும் அண்ணே!");
+                    loadAdminDashboard(); // ரீலோடு செய்து பழைய ஸ்டேட்டஸுக்கே கொண்டு போகும்
+                    return;
+                }
+                ticket.action_taken = action; // விபரத்தை சேமிக்கிறது
+            }
+
             localStorage.setItem(key, JSON.stringify(ticket));
             loadAdminDashboard();
         }
@@ -140,14 +157,12 @@
         document.getElementById('photoModal').style.display = 'none';
     }
 
-    // 📥 EXCEL டவுன்லோட் செய்யும் வசதி
     function downloadExcel() {
         let table = document.getElementById("reportTable");
         let wb = XLSX.utils.table_to_book(table, {sheet: "AMC Complaints"});
         XLSX.writeFile(wb, "AMC_Complaint_Report.xlsx");
     }
 
-    // 📥 PDF டவுன்லோட் செய்யும் வசதி
     function downloadPDF() {
         let element = document.getElementById('pdfArea');
         let opt = {
