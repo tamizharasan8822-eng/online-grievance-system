@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Support - Hardware & Software</title>
+    <title>IT Support & Hardware Grievance</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
-            background-color: #f3f4f6;
+            background-color: #f3f4f6; /* லைட் கிரே பேக்கிரவுண்ட் */
             color: #333333;
             padding: 20px;
             display: flex;
@@ -17,8 +17,8 @@
         }
         .container {
             width: 100%;
-            max-width: 600px;
-            background: #ffffff;
+            max-width: 650px;
+            background: #ffffff; /* வெள்ளை நிற பாக்ஸ் */
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -41,6 +41,7 @@
             box-sizing: border-box;
             font-size: 14px;
             background-color: #ffffff;
+            color: #000000;
         }
         textarea {
             resize: vertical;
@@ -48,13 +49,13 @@
         .btn-submit {
             width: 100%;
             padding: 12px;
-            background-color: #1d4ed8;
+            background-color: #1d4ed8; /* நீல நிற சப்மிட் பட்டன் */
             color: white;
             border: none;
             border-radius: 4px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 25px;
             font-size: 15px;
         }
         .btn-submit:hover {
@@ -63,18 +64,15 @@
         h2 {
             font-size: 20px;
             color: #1e3a8a;
-            margin-top: 25px;
+            margin-top: 30px;
             margin-bottom: 15px;
             border-bottom: 2px solid #1d4ed8;
             padding-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .btn-track {
             width: 100%;
             padding: 12px;
-            background-color: #0f172a;
+            background-color: #0f172a; /* கருப்பு நிற டிராக் பட்டன் */
             color: white;
             border: none;
             border-radius: 4px;
@@ -94,29 +92,77 @@
             border: 1px solid #e2e8f0;
             border-radius: 4px;
         }
+        .photo-upload-section {
+            display: none; /* ஆரம்பத்தில் மறைந்திருக்கும் */
+            background-color: #fef2f2;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            border: 1px dashed #ef4444;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <form id="grievanceForm">
-        <label>Select Faulty Component:</label>
-        <select id="component">
-            <option value="Computer / Monitor Issue">Computer / Monitor Issue</option>
-            <option value="Mouse Problem">Mouse Problem</option>
-            <option value="RAM Problem" selected>RAM Problem</option>
-            <option value="Motherboard Problem">Motherboard Problem</option>
+        <!-- 👤 பயனர் விபரங்கள் -->
+        <label>User Name (புகார் அளிப்பவர் பெயர்):</label>
+        <input type="text" id="userName" placeholder="உங்க பெயர் எழுதவும்" required>
+
+        <label>Section Name (பிரிவு பெயர்):</label>
+        <input type="text" id="sectionName" placeholder="பிரிவு பெயர் எழுதவும்" required>
+
+        <label>Designation (பதவி):</label>
+        <select id="designation">
+            <option value="A.E">A.E (Assistant Engineer)</option>
+            <option value="JE">JE (Junior Engineer)</option>
+            <option value="RS">RS (Revenue Supervisor)</option>
+            <option value="Foreman">Foreman</option>
+            <option value="CI">CI (Commercial Inspector)</option>
+            <option value="Gangman">Gangman</option>
         </select>
 
-        <label>Grievance Description:</label>
-        <textarea id="description" rows="4" required>Ram complaint</textarea>
+        <!-- 🛠️ ஹார்டுவேர் பிரச்சனைகள் லிஸ்ட் -->
+        <label>Select Faulty Component (பிரச்சனை):</label>
+        <select id="component">
+            <option value="Motherboard Issue">Motherboard Issue</option>
+            <option value="Monitor Issue">Monitor Issue</option>
+            <option value="Keyboard and Mouse Problem">Keyboard and Mouse Problem</option>
+            <option value="SMPS Problem">SMPS Problem</option>
+            <option value="RAM Problem">RAM Problem</option>
+            <option value="Network Issue">Network Issue</option>
+            <option value="Other">Other (இதர பிரச்சனைகள்)</option>
+        </select>
 
-        <label>Upload Proof/Photo:</label>
-        <input type="file" id="proofFile">
+        <!-- ⚡ எலக்ட்ரிகல் கண்டிஷன்கள் -->
+        <label>ELCB / RCCB Availability (இருக்கிறதா?):</label>
+        <select id="elcbStatus" onchange="togglePhotoUpload(this.value)">
+            <option value="No">No (இல்லை)</option>
+            <option value="Yes">Yes (இருக்கிறது)</option>
+        </select>
+
+        <!-- 📸 'Yes' என்று சொன்னால் மட்டும் காட்டும் போட்டோ அப்லோடு ஆப்ஷன் -->
+        <div id="photoUploadDiv" class="photo-upload-section">
+            <label style="margin-top: 0; color: #b91c1c;">📸 Take & Upload ELCB/RCCB Photo:</label>
+            <input type="file" id="elcbPhoto" accept="image/*">
+        </div>
+
+        <label>Earth Condition (எர்த் நிலை):</label>
+        <select id="earthCondition">
+            <option value="Good">Good (நன்றாக உள்ளது)</option>
+            <option value="Bad">Bad (பழுதாக உள்ளது)</option>
+            <option value="Not Available">Not Available (எர்த் வசதி இல்லை)</option>
+        </select>
+
+        <!-- 📝 டிஸ்கிரிப்ஷன் -->
+        <label>Grievance Description (விபரம்):</label>
+        <textarea id="description" rows="4" placeholder="பிரச்சனை பற்றிய கூடுதல் விபரம்..." required></textarea>
 
         <button type="submit" class="btn-submit">Submit Ticket to IT Team</button>
     </form>
 
+    <!-- 🔍 டிராக் செய்யும் பகுதி -->
     <h2>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
     
     <label>Enter Complaint Reference Number:</label>
@@ -128,49 +174,65 @@
 </div>
 
 <script>
-    // சப்மிட் செய்யும்போது லோக்கல் மெமரியில் மட்டும் டேட்டா சேவ் ஆகும்
+    // 📸 ELCB 'Yes' சொன்னா போட்டோ பாக்ஸ் காட்டும் லாஜிக்
+    function togglePhotoUpload(value) {
+        const photoDiv = document.getElementById('photoUploadDiv');
+        if (value === 'Yes') {
+            photoDiv.style.display = 'block';
+            document.getElementById('elcbPhoto').required = true;
+        } else {
+            photoDiv.style.display = 'none';
+            document.getElementById('elcbPhoto').required = false;
+        }
+    }
+
+    // 🚀 லோக்கல் மெமரியில் சேமிக்கும் சப்மிட் ஃபங்க்ஷன்
     document.getElementById('grievanceForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        let ticketId = "REG123456"; 
+        let ticketId = "REG" + Math.floor(100000 + Math.random() * 900000); // ரேண்டம் ஐடி உருவாக்குகிறது
+        
         let ticketData = {
             id: ticketId,
+            user_name: document.getElementById('userName').value,
+            section_name: document.getElementById('sectionName').value,
+            designation: document.getElementById('designation').value,
             component: document.getElementById('component').value,
+            elcb: document.getElementById('elcbStatus').value,
+            earth: document.getElementById('earthCondition').value,
             description: document.getElementById('description').value,
             status: "Pending"
         };
 
-        localStorage.setItem('local_ticket', JSON.stringify(ticketData));
-        alert(`⚡ Ticket Created Successfully!\nReference Number: ${ticketId}`);
+        // லோக்கலில் பத்திரமாகச் சேமிக்கும் (சர்வர் எரர் வராது)
+        localStorage.setItem(`ticket_${ticketId}`, JSON.stringify(ticketData));
+        
+        alert(`⚡ Ticket Created Successfully!\nYour Reference Number: ${ticketId}`);
         document.getElementById('trackId').value = ticketId;
+        document.getElementById('grievanceForm').reset();
+        document.getElementById('photoUploadDiv').style.display = 'none';
     });
 
-    // ஸ்டேட்டஸ் செக் செய்யும் லாஜிக்
+    // 🔍 ஸ்டேட்டஸ் டிராக்கிங் லாஜிக்
     function checkStatus() {
-        let inputId = document.getElementById('trackId').value.trim();
+        let inputId = document.getElementById('trackId').value.trim().toUpperCase();
         let resultBox = document.getElementById('statusResult');
-        let ticket = JSON.parse(localStorage.getItem('local_ticket'));
+        let localData = localStorage.getItem(`ticket_${inputId}`);
 
-        // லோக்கலில் தரவு இல்லை என்றால் டீஃபால்ட்டாகக் காட்டுவது
-        if (!ticket) {
-            ticket = {
-                id: "REG123456",
-                component: "RAM Problem",
-                description: "Ram complaint",
-                status: "Pending"
-            };
-        }
-
-        if (inputId === ticket.id || inputId.toUpperCase() === "REG123456") {
+        if (localData) {
+            let ticket = JSON.parse(localData);
             resultBox.style.display = "block";
             resultBox.innerHTML = `
-                <p style="margin: 5px 0;"><strong>Ticket ID:</strong> ${ticket.id}</p>
-                <p style="margin: 5px 0;"><strong>Component:</strong> ${ticket.component}</p>
-                <p style="margin: 5px 0;"><strong>Description:</strong> ${ticket.description}</p>
-                <p style="margin: 5px 0;"><strong>Status:</strong> <span style="background:#b45309; color:white; padding:2px 6px; border-radius:3px; font-weight:bold;">${ticket.status}</span></p>
+                <p style="margin: 6px 0;"><strong>Ticket ID:</strong> ${ticket.id}</p>
+                <p style="margin: 6px 0;"><strong>User Name:</strong> ${ticket.user_name} (${ticket.designation})</p>
+                <p style="margin: 6px 0;"><strong>Section:</strong> ${ticket.section_name}</p>
+                <p style="margin: 6px 0;"><strong>Component:</strong> ${ticket.component}</p>
+                <p style="margin: 6px 0;"><strong>ELCB / Earth:</strong> ${ticket.elcb} / ${ticket.earth}</p>
+                <p style="margin: 6px 0;"><strong>Description:</strong> ${ticket.description}</p>
+                <p style="margin: 6px 0;"><strong>Status:</strong> <span style="background:#b45309; color:white; padding:3px 6px; border-radius:3px; font-weight:bold;">${ticket.status}</span></p>
             `;
         } else {
-            alert("⚠️ Invalid Reference Number!");
+            alert("⚠️ Invalid Reference Number! இந்த புகார் எண் இல்லை அண்ணே.");
             resultBox.style.display = "none";
         }
     }
