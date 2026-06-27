@@ -3,120 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC Complaint Report - Strict Admin Panel</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <title>AMC Complaint Report - Admin Panel</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0f172a; color: #ffffff; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; }
-        h2 { color: #38bdf8; text-align: center; border-bottom: 2px solid #334155; padding-bottom: 15px; }
-        .subtitle { text-align: center; color: #94a3b8; font-size: 16px; margin-bottom: 25px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 14px; text-align: left; border: 1px solid #334155; font-size: 14px; }
-        th { background-color: #0f172a; color: #38bdf8; }
-        .status-select { padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 13px; color: white; border: none; cursor: pointer; }
-        .status-pending { background-color: #b45309; }
-        .status-progress { background-color: #0284c7; }
-        .status-closed { background-color: #047857; }
-        .btn-pdf { background-color: #10b981; color: white; border: none; padding: 10px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background-color: #f3f4f6; /* லைட் கிரே பேக்கிரவுண்ட் */
+            color: #333333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff; /* வெள்ளை நிற பாக்ஸ் */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #1e3a8a;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #1d4ed8;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #ffffff;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f8fafc;
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+        select {
+            padding: 6px 10px;
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .no-data {
+            text-align: center;
+            color: #6b7280;
+            padding: 30px;
+            font-style: italic;
+        }
+        .btn-clear {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 15px;
+        }
+        .btn-clear:hover {
+            background-color: #dc2626;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📊 AMC Complaint Report for Admin Panel</h2>
-    <div class="subtitle">நீங்க சொன்ன அந்த ஒரு குறிப்பிட்ட லோக்கல் லைவ் புகார் மட்டும்:</div>
+    <button class="btn-clear" onclick="clearAllTickets()">Clear All Records</button>
+    <h2>📊 AMC Complaint Report (Admin Control Panel)</h2>
     
-    <div style="text-align: right; margin-bottom: 20px;">
-        <button class="btn-pdf" onclick="downloadPDF()">📄 PDF டவுன்லோட்</button>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>புகார் ID</th>
+                    <th>பணியாளர் விபரம்</th>
+                    <th>பிரிவு</th>
+                    <th>பிரச்சனை (Component)</th>
+                    <th>ELCB / எர்த்</th>
+                    <th>கூடுதல் விபரம்</th>
+                    <th>நிலை (Status)</th>
+                </tr>
+            </thead>
+            <tbody id="adminTableBody">
+                <!-- யூசர் சப்மிட் செய்யும் டேட்டா இங்கே லோடாகும் -->
+            </tbody>
+        </table>
     </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>புகார் ID</th>
-                <th>ஸ்டாஃப் விபரம்</th>
-                <th>பிரிவு பெயர்</th>
-                <th>பிரச்சனை (Component)</th>
-                <th>விபரம் (Description)</th>
-                <th>தேதி</th>
-                <th>நிலை (மாற்ற கிளிக் செய்க)</th>
-            </tr>
-        </thead>
-        <tbody id="complaintTableBody">
-            <!-- லோக்கல் டேட்டா -->
-        </tbody>
-    </table>
 </div>
 
 <script>
-    function loadComplaints() {
-        const tbody = document.getElementById('complaintTableBody');
+    window.onload = loadAdminDashboard;
+
+    // 🔄 லோக்கல் மெமரியில் இருந்து தரவை எடுத்து டேபிளில் காட்டும் ஃபங்க்ஷன்
+    function loadAdminDashboard() {
+        const tbody = document.getElementById('adminTableBody');
+        tbody.innerHTML = '';
         
-        // மெமரியில் இருந்து எடுக்கும், இல்லைனா பிரெஷ்ஷாக செட் பண்ணும்
-        let savedTicket = JSON.parse(localStorage.getItem('master_ticket'));
-        if(!savedTicket) {
-            savedTicket = {
-                id: "EB293082",
-                staff_name: "Dinesh (A.E)",
-                section_name: "North Section",
-                component: "Computer / Monitor Issue",
-                description: "CRT Monitor issue",
-                date: "26/06/2026",
-                status: localStorage.getItem('master_status') || "Pending"
-            };
-            localStorage.setItem('master_ticket', JSON.stringify(savedTicket));
+        let hasTickets = false;
+
+        // localStorage-ல் இருக்கும் 'ticket_' என்று தொடங்கும் அனைத்து தரவையும் எடுக்கிறது
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key.startsWith('ticket_')) {
+                hasTickets = true;
+                let ticket = JSON.parse(localStorage.getItem(key));
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong style="color: #1d4ed8;">${ticket.id}</strong></td>
+                        <td><strong>${ticket.user_name}</strong><br><span style="color: #6b7280; font-size: 12px;">${ticket.designation}</span></td>
+                        <td>${ticket.section_name}</td>
+                        <td><span style="color: #b45309; font-weight: 500;">${ticket.component}</span></td>
+                        <td>
+                            <strong>ELCB:</strong> ${ticket.elcb}<br>
+                            <strong>Earth:</strong> ${ticket.earth}
+                        </td>
+                        <td>${ticket.description}</td>
+                        <td>
+                            <select onchange="updateTicketStatus('${ticket.id}', this.value)">
+                                <option value="Pending" ${ticket.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                <option value="Resolved & Closed" ${ticket.status === 'Resolved & Closed' ? 'selected' : ''}>Resolved & Closed</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            }
         }
 
-        let bgClass = 'status-pending';
-        if(savedTicket.status === 'In Progress') bgClass = 'status-progress';
-        if(savedTicket.status === 'Resolved & Closed') bgClass = 'status-closed';
-
-        tbody.innerHTML = `
-            <tr>
-                <td><strong>${savedTicket.id}</strong></td>
-                <td>${savedTicket.staff_name}</td>
-                <td>${savedTicket.section_name}</td>
-                <td><span style="color:#38bdf8; font-weight:bold;">${savedTicket.component}</span></td>
-                <td>${savedTicket.description}</td>
-                <td>${savedTicket.date}</td>
-                <td>
-                    <select class="status-select ${bgClass}" onchange="updateStatus(this.value)">
-                        <option value="Pending" ${savedTicket.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                        <option value="In Progress" ${savedTicket.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                        <option value="Resolved & Closed" ${savedTicket.status === 'Resolved & Closed' ? 'selected' : ''}>Resolved & Closed</option>
-                    </select>
-                </td>
-            </tr>
-        `;
-    }
-
-    function updateStatus(newStatus) {
-        let savedTicket = JSON.parse(localStorage.getItem('master_ticket'));
-        if(savedTicket) {
-            savedTicket.status = newStatus;
-            localStorage.setItem('master_ticket', JSON.stringify(savedTicket));
-            localStorage.setItem('master_status', newStatus); // பேக்அப்
+        if (!hasTickets) {
+            tbody.innerHTML = `<tr><td colspan="7" class="no-data">⚠️ தற்போதைக்கு எந்த புகார்களும் பதிவு செய்யப்படவில்லை அண்ணே!</td></tr>`;
         }
-        loadComplaints();
     }
 
-    function downloadPDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
-        let savedTicket = JSON.parse(localStorage.getItem('master_ticket'));
+    // 🔄 அட்மின் மாற்றும் ஸ்டேட்டஸை லோக்கலில் அப்டேட் செய்யும் ஃபங்க்ஷன்
+    function updateTicketStatus(ticketId, newStatus) {
+        let key = `ticket_${ticketId}`;
+        let ticketData = localStorage.getItem(key);
         
-        doc.text("AMC Admin Report", 14, 15);
-        doc.autoTable({
-            head: [['Ticket ID', 'Staff Details', 'Section', 'Component', 'Description', 'Date', 'Status']],
-            body: [[savedTicket.id, savedTicket.staff_name, savedTicket.section_name, savedTicket.component, savedTicket.description, savedTicket.date, savedTicket.status]],
-            startY: 25,
-            theme: 'grid'
-        });
-        doc.save(`AMC_Report_${savedTicket.id}.pdf`);
+        if (ticketData) {
+            let ticket = JSON.parse(ticketData);
+            ticket.status = newStatus;
+            localStorage.setItem(key, JSON.stringify(ticket)); // புதிய ஸ்டேட்டஸை சேமிக்கிறது
+            alert(`👍 Ticket ${ticketId} status updated to: ${newStatus}`);
+            loadAdminDashboard();
+        }
     }
 
-    window.onload = loadComplaints;
+    // ❌ அனைத்து ரெக்கார்டுகளையும் டெலீட் செய்ய
+    function clearAllTickets() {
+        if (confirm("அனைத்து புகார்களின் விபரங்களையும் மொத்தமாக நீக்கலாமா அண்ணே?")) {
+            let keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                if (localStorage.key(i).startsWith('ticket_')) {
+                    keysToRemove.push(localStorage.key(i));
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            loadAdminDashboard();
+        }
+    }
 </script>
+
 </body>
 </html>
