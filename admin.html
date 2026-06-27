@@ -5,78 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMC Complaint Report - Admin Panel</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            background-color: #f3f4f6; /* லைட் கிரே பேக்கிரவுண்ட் */
-            color: #333333;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #ffffff; /* வெள்ளை நிற பாக்ஸ் */
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #1e3a8a;
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #1d4ed8;
-            padding-bottom: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background: #ffffff;
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border: 1px solid #e5e7eb;
-            font-size: 14px;
-        }
-        th {
-            background-color: #f8fafc;
-            color: #1e3a8a;
-            font-weight: 600;
-        }
-        tr:hover {
-            background-color: #f1f5f9;
-        }
-        select {
-            padding: 6px 10px;
-            background: #ffffff;
-            color: #000000;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .no-data {
-            text-align: center;
-            color: #6b7280;
-            padding: 30px;
-            font-style: italic;
-        }
-        .btn-clear {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            float: right;
-            margin-bottom: 15px;
-        }
-        .btn-clear:hover {
-            background-color: #dc2626;
-        }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f3f4f6; color: #333333; padding: 20px; }
+        .container { max-width: 1300px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        h2 { color: #1e3a8a; text-align: center; margin-bottom: 25px; border-bottom: 2px solid #1d4ed8; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #ffffff; }
+        th, td { padding: 12px 15px; text-align: left; border: 1px solid #e5e7eb; font-size: 14px; }
+        th { background-color: #f8fafc; color: #1e3a8a; font-weight: 600; }
+        tr:hover { background-color: #f1f5f9; }
+        select { padding: 6px; border-radius: 4px; font-weight: bold; border: 1px solid #d1d5db; }
+        .btn-view { background-color: #10b981; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-view:hover { background-color: #059669; }
+        .btn-clear { background-color: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; float: right; }
+        
+        /* 🖼️ போட்டோ பார்க்கும் பாப்-அப் விண்டோ ஸ்டைல் */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
+        .modal-content { max-width: 80%; max-height: 80%; background: white; padding: 10px; border-radius: 8px; position: relative; }
+        .close-btn { position: absolute; top: -10px; right: -10px; background: red; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -89,50 +33,60 @@
         <table>
             <thead>
                 <tr>
+                    <th>தேதி & நேரம்</th>
                     <th>புகார் ID</th>
                     <th>பணியாளர் விபரம்</th>
                     <th>பிரிவு</th>
                     <th>பிரச்சனை (Component)</th>
+                    <th>பொருள் போட்டோ</th>
                     <th>ELCB / எர்த்</th>
-                    <th>கூடுதல் விபரம்</th>
                     <th>நிலை (Status)</th>
                 </tr>
             </thead>
-            <tbody id="adminTableBody">
-                <!-- யூசர் சப்மிட் செய்யும் டேட்டா இங்கே லோடாகும் -->
-            </tbody>
+            <tbody id="adminTableBody"></tbody>
         </table>
+    </div>
+</div>
+
+<!-- 🖼️ போட்டோக்களைப் பெரியதாகக் காட்டும் பாப்-அப் பாக்ஸ் -->
+<div id="photoModal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">X</button>
+        <img id="modalImg" src="" alt="Material Photo" style="max-width: 100%; max-height: 70vh; display: block; margin: 0 auto;">
     </div>
 </div>
 
 <script>
     window.onload = loadAdminDashboard;
 
-    // 🔄 லோக்கல் மெமரியில் இருந்து தரவை எடுத்து டேபிளில் காட்டும் ஃபங்க்ஷன்
     function loadAdminDashboard() {
         const tbody = document.getElementById('adminTableBody');
         tbody.innerHTML = '';
-        
         let hasTickets = false;
 
-        // localStorage-ல் இருக்கும் 'ticket_' என்று தொடங்கும் அனைத்து தரவையும் எடுக்கிறது
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
             if (key.startsWith('ticket_')) {
                 hasTickets = true;
                 let ticket = JSON.parse(localStorage.getItem(key));
                 
+                // ELCB போட்டோ இருந்தால் மட்டும் பட்டன் காட்டும்
+                let elcbPhotoBtn = ticket.elcb_photo ? `<br><button class="btn-view" onclick="openModal('${ticket.elcb_photo}')">View ELCB Photo</button>` : '';
+
                 tbody.innerHTML += `
                     <tr>
+                        <td style="color: #6b7280; font-weight: 500;">${ticket.date || 'N/A'}</td>
                         <td><strong style="color: #1d4ed8;">${ticket.id}</strong></td>
                         <td><strong>${ticket.user_name}</strong><br><span style="color: #6b7280; font-size: 12px;">${ticket.designation}</span></td>
                         <td>${ticket.section_name}</td>
                         <td><span style="color: #b45309; font-weight: 500;">${ticket.component}</span></td>
                         <td>
-                            <strong>ELCB:</strong> ${ticket.elcb}<br>
+                            <button class="btn-view" onclick="openModal('${ticket.material_photo}')">📸 View Material</button>
+                        </td>
+                        <td>
+                            <strong>ELCB:</strong> ${ticket.elcb} ${elcbPhotoBtn}<br>
                             <strong>Earth:</strong> ${ticket.earth}
                         </td>
-                        <td>${ticket.description}</td>
                         <td>
                             <select onchange="updateTicketStatus('${ticket.id}', this.value)">
                                 <option value="Pending" ${ticket.status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -144,40 +98,42 @@
                 `;
             }
         }
-
         if (!hasTickets) {
-            tbody.innerHTML = `<tr><td colspan="7" class="no-data">⚠️ தற்போதைக்கு எந்த புகார்களும் பதிவு செய்யப்படவில்லை அண்ணே!</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:30px; color:#6b7280;">⚠️ புகார்கள் எதுவும் இல்லை அண்ணே!</td></tr>`;
         }
     }
 
-    // 🔄 அட்மின் மாற்றும் ஸ்டேட்டஸை லோக்கலில் அப்டேட் செய்யும் ஃபங்க்ஷன்
     function updateTicketStatus(ticketId, newStatus) {
         let key = `ticket_${ticketId}`;
-        let ticketData = localStorage.getItem(key);
-        
-        if (ticketData) {
-            let ticket = JSON.parse(ticketData);
+        let ticket = JSON.parse(localStorage.getItem(key));
+        if (ticket) {
             ticket.status = newStatus;
-            localStorage.setItem(key, JSON.stringify(ticket)); // புதிய ஸ்டேட்டஸை சேமிக்கிறது
-            alert(`👍 Ticket ${ticketId} status updated to: ${newStatus}`);
+            localStorage.setItem(key, JSON.stringify(ticket));
             loadAdminDashboard();
         }
     }
 
-    // ❌ அனைத்து ரெக்கார்டுகளையும் டெலீட் செய்ய
+    // 🖼️ போட்டோக்களை பாப்-அப்பில் ஓபன் செய்யும் ஃபங்க்ஷன்
+    function openModal(base64Src) {
+        if(!base64Src) { alert("போட்டோ எதுவும் அப்லோடு செய்யப்படவில்லை அண்ணே!"); return; }
+        document.getElementById('modalImg').src = base64Src;
+        document.getElementById('photoModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('photoModal').style.display = 'none';
+    }
+
     function clearAllTickets() {
-        if (confirm("அனைத்து புகார்களின் விபரங்களையும் மொத்தமாக நீக்கலாமா அண்ணே?")) {
-            let keysToRemove = [];
+        if (confirm("அனைத்து புகார்களையும் நீக்கலாமா?")) {
+            let keys = [];
             for (let i = 0; i < localStorage.length; i++) {
-                if (localStorage.key(i).startsWith('ticket_')) {
-                    keysToRemove.push(localStorage.key(i));
-                }
+                if (localStorage.key(i).startsWith('ticket_')) keys.push(localStorage.key(i));
             }
-            keysToRemove.forEach(key => localStorage.removeItem(key));
+            keys.forEach(k => localStorage.removeItem(k));
             loadAdminDashboard();
         }
     }
 </script>
-
 </body>
 </html>
