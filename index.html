@@ -3,110 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Support & EB AMC Grievance</title>
+    <title>IT Support - Hardware & Software</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #0b0f19; color: #ffffff; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: #111827; padding: 30px; border-radius: 8px; border: 1px solid #1f2937; }
-        h2, h3 { text-align: center; color: #38bdf8; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #9ca3af; }
-        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; background: #1f2937; color: white; border: 1px solid #374151; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        button:hover { background: #1d4ed8; }
-        .btn-track { background: #1f2937; border: 1px solid #374151; margin-top: 10px; }
-        .btn-track:hover { background: #374151; }
-        .status-box { display: none; margin-top: 20px; padding: 15px; background: #1f2937; border-radius: 4px; border: 1px solid #374151; }
-        .badge { background: #b45309; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background-color: #f3f4f6;
+            color: #333333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        input[type="text"], select, textarea, input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+            background-color: #ffffff;
+        }
+        textarea {
+            resize: vertical;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #1d4ed8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 15px;
+        }
+        .btn-submit:hover {
+            background-color: #1e40af;
+        }
+        h2 {
+            font-size: 20px;
+            color: #1e3a8a;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #1d4ed8;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-track {
+            width: 100%;
+            padding: 12px;
+            background-color: #0f172a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 15px;
+        }
+        .btn-track:hover {
+            background-color: #1e293b;
+        }
+        .status-result {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>📝 Submit IT Team Ticket</h2>
-    <form id="complaintForm">
-        <label>Staff Name (ஸ்டாஃப் விபரம்):</label>
-        <input type="text" id="staffName" value="Dinesh (A.E)" required>
-
-        <label>Section Name (பிரிவு பெயர்):</label>
-        <input type="text" id="sectionName" value="North Section" required>
-
-        <label>Faulty Component (பிரச்சனை):</label>
+    <form id="grievanceForm">
+        <label>Select Faulty Component:</label>
         <select id="component">
-            <option value="Computer / Monitor Issue" selected>Computer / Monitor Issue</option>
+            <option value="Computer / Monitor Issue">Computer / Monitor Issue</option>
             <option value="Mouse Problem">Mouse Problem</option>
-            <option value="RAM Problem">RAM Problem</option>
+            <option value="RAM Problem" selected>RAM Problem</option>
             <option value="Motherboard Problem">Motherboard Problem</option>
         </select>
 
-        <label>Grievance Description (விபரம்) *:</label>
-        <textarea id="description" rows="4" required>CRT Monitor issue</textarea>
+        <label>Grievance Description:</label>
+        <textarea id="description" rows="4" required>Ram complaint</textarea>
 
-        <button type="submit">Submit Ticket to IT Team</button>
+        <label>Upload Proof/Photo:</label>
+        <input type="file" id="proofFile">
+
+        <button type="submit" class="btn-submit">Submit Ticket to IT Team</button>
     </form>
 
-    <div style="margin: 30px 0; border-top: 1px solid #374151;"></div>
+    <h2>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h2>
+    
+    <label>Enter Complaint Reference Number:</label>
+    <input type="text" id="trackId" placeholder="e.g., REG123456">
+    
+    <button type="button" class="btn-track" onclick="checkStatus()">Check Status</button>
 
-    <h3>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h3>
-    <label>Enter Ticket Number:</label>
-    <input type="text" id="trackId" value="EB293082">
-    <button class="btn-track" onclick="trackTicket()">Check Office Database</button>
-
-    <div id="statusBox" class="status-box"></div>
+    <div id="statusResult" class="status-result"></div>
 </div>
 
 <script>
-    document.getElementById('complaintForm').addEventListener('submit', function(e) {
+    // சப்மிட் செய்யும்போது லோக்கல் மெமரியில் மட்டும் டேட்டா சேவ் ஆகும்
+    document.getElementById('grievanceForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        let ticketId = "EB293082"; 
+        let ticketId = "REG123456"; 
         let ticketData = {
             id: ticketId,
-            staff_name: document.getElementById('staffName').value,
-            section_name: document.getElementById('sectionName').value,
             component: document.getElementById('component').value,
             description: document.getElementById('description').value,
-            date: new Date().toLocaleDateString('en-GB'),
-            status: localStorage.getItem('master_status') || "Pending"
+            status: "Pending"
         };
 
-        // 100% லோக்கல் மெமரியில் மட்டும் சேமிக்கும், எரர் வராது!
-        localStorage.setItem('master_ticket', JSON.stringify(ticketData));
-        alert(`⚡ Ticket Created Successfully!\nYour Ticket ID: ${ticketId}`);
+        localStorage.setItem('local_ticket', JSON.stringify(ticketData));
+        alert(`⚡ Ticket Created Successfully!\nReference Number: ${ticketId}`);
+        document.getElementById('trackId').value = ticketId;
     });
 
-    function trackTicket() {
+    // ஸ்டேட்டஸ் செக் செய்யும் லாஜிக்
+    function checkStatus() {
         let inputId = document.getElementById('trackId').value.trim();
-        let statusBox = document.getElementById('statusBox');
-        let ticket = JSON.parse(localStorage.getItem('master_ticket'));
+        let resultBox = document.getElementById('statusResult');
+        let ticket = JSON.parse(localStorage.getItem('local_ticket'));
 
+        // லோக்கலில் தரவு இல்லை என்றால் டீஃபால்ட்டாகக் காட்டுவது
         if (!ticket) {
             ticket = {
-                id: "EB293082",
-                staff_name: "Dinesh (A.E)",
-                section_name: "North Section",
-                component: "Computer / Monitor Issue",
-                description: "CRT Monitor issue",
-                date: "26/06/2026",
-                status: localStorage.getItem('master_status') || "Pending"
+                id: "REG123456",
+                component: "RAM Problem",
+                description: "Ram complaint",
+                status: "Pending"
             };
-            localStorage.setItem('master_ticket', JSON.stringify(ticket));
         }
 
-        if (inputId === ticket.id || inputId === "293082") {
-            let currentStatus = localStorage.getItem('master_status') || ticket.status;
-            statusBox.style.display = "block";
-            statusBox.innerHTML = `
-                <p>📌 <strong>Ticket ID:</strong> ${ticket.id}</p>
-                <p>🟢 <strong>Status:</strong> <span class="badge">${currentStatus}</span></p>
-                <p>👤 <strong>Staff:</strong> ${ticket.staff_name}</p>
-                <p>🏢 <strong>Section:</strong> ${ticket.section_name}</p>
-                <p>⚙️ <strong>Component:</strong> ${ticket.component}</p>
-                <p>📝 <strong>Description:</strong> ${ticket.description}</p>
+        if (inputId === ticket.id || inputId.toUpperCase() === "REG123456") {
+            resultBox.style.display = "block";
+            resultBox.innerHTML = `
+                <p style="margin: 5px 0;"><strong>Ticket ID:</strong> ${ticket.id}</p>
+                <p style="margin: 5px 0;"><strong>Component:</strong> ${ticket.component}</p>
+                <p style="margin: 5px 0;"><strong>Description:</strong> ${ticket.description}</p>
+                <p style="margin: 5px 0;"><strong>Status:</strong> <span style="background:#b45309; color:white; padding:2px 6px; border-radius:3px; font-weight:bold;">${ticket.status}</span></p>
             `;
         } else {
-            alert("⚠️ Ticket Not Found!");
-            statusBox.style.display = "none";
+            alert("⚠️ Invalid Reference Number!");
+            resultBox.style.display = "none";
         }
     }
 </script>
+
 </body>
 </html>
