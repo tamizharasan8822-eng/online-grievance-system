@@ -31,6 +31,7 @@
         .modal-content { max-width: 80%; max-height: 80%; background: white; padding: 15px; border-radius: 8px; position: relative; text-align: center; }
         .close-btn { position: absolute; top: -12px; right: -12px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; font-size: 16px; }
         .desc-text { display: block; margin-top: 5px; color: #4b5563; font-size: 11px; font-style: italic; background-color: #f8fafc; padding: 4px; border-radius: 3px; border-left: 2px solid #cbd5e1; }
+        .time-text { display: block; margin-top: 5px; color: #6b7280; font-size: 11px; font-weight: normal; }
     </style>
 </head>
 <body>
@@ -109,10 +110,21 @@
                 let materialPhotoBtn = ticket.material_photo ? `<button class="btn-view" onclick="openModal('${ticket.material_photo}')">📸 View Material</button>` : 'No Photo';
                 let elcbPhotoBtn = ticket.elcb_photo ? `<br><button class="btn-view" style="margin-top:5px; background-color:#10b981;" onclick="openModal('${ticket.elcb_photo}')">📸 View ELCB</button>` : '';
                 
-                // பிரேக் லைன்களை சரியாகக் காட்டுவதற்கு உரை மாற்றி அமைக்கப்படுகிறது
-                let formattedAction = ticket.action_taken ? ticket.action_taken.replace(/\n/g, '<br>') : '<span style="color: #9ca3af; font-style: italic;">No Action Logged Yet</span>';
-                let actionTakenText = `<span style="color: #16a34a; font-weight: 600; font-size:12px;">${formattedAction}</span>`;
+                // 🔄 அண்ணே இங்க தான் ஸ்ப்ளிட் பண்ணி தனியா பிரிக்கிறோம்
+                let actionPart = '<span style="color: #9ca3af; font-style: italic;">No Action Logged Yet</span>';
+                let timePart = '';
                 
+                if (ticket.action_taken) {
+                    if (ticket.action_taken.includes('|')) {
+                        let parts = ticket.action_taken.split('|');
+                        actionPart = parts[0].trim();
+                        timePart = `<span class="time-text">⏱️ <strong>${parts[1].trim()}</strong></span>`;
+                    } else {
+                        actionPart = ticket.action_taken;
+                    }
+                }
+                
+                let actionTakenText = `<span style="color: #16a34a; font-weight: 600; font-size:12px;">${actionPart}</span>${timePart}`;
                 let descriptionSection = ticket.description ? `<span class="desc-text"><strong>விபரம்:</strong> ${ticket.description}</span>` : '';
 
                 tbody.innerHTML += `
