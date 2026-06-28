@@ -75,31 +75,15 @@
 </div>
 
 <script>
-    // 🌍 Aiven Online DB Configuration - பாஸ்வேர்டுடன் இணைக்கப்பட்டது
-    const dbConfig = {
-        host: 'mysql-36052920-tamizharasan8822-28a1.h.aivencloud.com',
-        port: 22638,
-        user: 'avnadmin',
-        password: 'AVNS_0I2TBL2HSueOubXuyCH',
-        database: 'defaultdb'
-    };
-
     let allTickets = [];
     window.onload = loadAdminDashboard;
 
-    async function executeQuery(sql, params = []) {
-        const response = await fetch(`https://mysql-http-bridge.vercel.app/api/query`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ config: dbConfig, sql, params })
-        });
-        return await response.json();
-    }
-
+    // 📤 சொந்த சர்வரிடமிருந்து லைவ் டேட்டாவை எடுக்கும் ஃபங்க்ஷன்
     async function loadAdminDashboard() {
         document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;">⏳ Cloud டேட்டாபேசில் இருந்து தரவுகள் லோடாகி கொண்டிருக்கிறது...</td></tr>';
         try {
-            allTickets = await executeQuery("SELECT * FROM amc_complaints ORDER BY date DESC");
+            const response = await fetch('/api/complaints');
+            allTickets = await response.json();
             renderTickets();
         } catch (error) {
             document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; color:red;">⚠️ தரவுகளை எடுப்பதில் தோல்வி!</td></tr>';
@@ -146,16 +130,27 @@
         if (!hasTickets) tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:#6b7280; font-weight:bold;">⚠️ விவரங்கள் எதுவும் இல்லை!</td></tr>`;
     }
 
+    // 🔄 சொந்த சர்வருக்கு ஸ்டேட்டஸ் மாற்றத்தை அனுப்பும் ஃபங்க்ஷன்
     async function updateTicketStatus(ticketId, newStatus) {
         let action = "";
         if (newStatus === "Resolved & Closed") {
             action = prompt("👨‍💻 இந்த புகாரை க்ளோஸ் செய்வதற்கு நீங்கள் என்ன நடவடிக்கை எடுத்தீர்கள்?:");
-            if (action === null || action.trim() === "") { alert("⚠️ தீர்வு விபரம் கட்டாயம் எழுத வேண்டும் அண்ணே!"); renderTickets(); return; }
+            if (action === null || action.trim() === "") { 
+                alert("⚠️ தீர்வு விபரம் கட்டாயம் எழுத வேண்டும் அண்ணே!"); 
+                renderTickets(); 
+                return; 
+            }
         }
         try {
-            await executeQuery("UPDATE amc_complaints SET status = ?, action_taken = ? WHERE id = ?", [newStatus, action, ticketId]);
-            alert(`👍 Ticket ${ticketId} updated successfully in Online Cloud DB!`);
-            loadAdminDashboard();
+            const response = await fetch(`/api/complaints/${ticketId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus, action_taken: action })
+            });
+            if(response.ok) {
+                alert(`👍 Ticket ${ticketId} updated successfully!`);
+                loadAdminDashboard();
+            }
         } catch (error) { alert("⚠️ அப்டேட் செய்வதில் சிக்கல்!"); }
     }
 
@@ -163,7 +158,18 @@
     function closeModal() { document.getElementById('photoModal').style.display = 'none'; }
     function downloadExcel() { let table = document.getElementById("reportTable"); let wb = XLSX.utils.table_to_book(table, {sheet: "AMC Complaints"}); XLSX.writeFile(wb, "AMC_Complaint_Report.xlsx"); }
     function downloadPDF() { let element = document.getElementById('pdfArea'); html2pdf().set({ margin: 10, filename: 'AMC_Complaint_Report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' } }).from(element).save(); }
-    async function clearAllTickets() { if (confirm("ஆன்லைன் டேட்டாபேசில் உள்ள அத்தனை புகார்களையும் நிரந்தரமாக நீக்கலாமா அண்ணே?")) { try { await executeQuery("TRUNCATE TABLE amc_complaints"); loadAdminDashboard(); } catch(e) { alert("நீக்குவதில் தோல்வி!"); } } }
+    
+    // 🧹 ஆன்லைன் டேட்டாபேஸை கிளியர் செய்ய
+    async function clearAllTickets() { 
+        if (confirm("ஆன்லைன் டேட்டாபேசில் உள்ள அத்தனை புகார்களையும் நிரந்தரமாக நீக்கலாமா அண்ணே?")) { 
+            try { 
+                const response = await fetch('/api/complaints/clear-all', { method: 'DELETE' });
+                if(response.ok) {
+                    loadAdminDashboard(); 
+                }
+            } catch(e) { alert("நீக்குவதில் தோல்வி!"); } 
+        } 
+    }
 </script>
 </body>
 </html>
