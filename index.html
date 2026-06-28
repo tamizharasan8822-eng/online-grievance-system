@@ -91,15 +91,7 @@
 </div>
 
 <script>
-    // 🌍 Aiven Online DB Configuration - பாஸ்வேர்டுடன் இணைக்கப்பட்டது
-    const dbConfig = {
-        host: 'mysql-36052920-tamizharasan8822-28a1.h.aivencloud.com',
-        port: 22638,
-        user: 'avnadmin',
-        password: 'AVNS_0I2TBL2HSueOubXuyCH',
-        database: 'defaultdb'
-    };
-
+    // எர்த் மற்றும் போட்டோ செக்ஷன் ஆன்/ஆஃப் செய்யும் ஃபங்க்ஷன்
     function togglePhotoUpload(value) {
         const photoDiv = document.getElementById('photoUploadDiv');
         const elcbInput = document.getElementById('elcbPhoto');
@@ -107,6 +99,7 @@
         else { photoDiv.style.display = 'none'; elcbInput.required = false; elcbInput.value = ""; }
     }
 
+    // போட்டோவை ஆன்லைன் டேட்டாபேஸிற்காக மாற்றும் ஃபங்க்ஷன்
     function convertToBase64(file) {
         return new Promise((resolve, reject) => {
             if(!file) resolve("");
@@ -117,19 +110,11 @@
         });
     }
 
-    async function executeQuery(sql, params = []) {
-        const response = await fetch(`https://mysql-http-bridge.vercel.app/api/query`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ config: dbConfig, sql, params })
-        });
-        return await response.json();
-    }
-
+    // படிவத்தை சப்மிட் செய்யும்போது இயங்கும் ஃபங்க்ஷன்
     document.getElementById('grievanceForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         let submitBtn = e.target.querySelector('.btn-submit');
-        submitBtn.innerText = "⏳ Submitting to Online DB...";
+        submitBtn.innerText = "⏳ Submitting to Cloud Live DB...";
         submitBtn.disabled = true;
 
         let ticketId = "REG" + Math.floor(100000 + Math.random() * 900000);
@@ -147,27 +132,38 @@
         let materialPhotoBase64 = await convertToBase64(materialFile);
         let elcbPhotoBase64 = elcbFile ? await convertToBase64(elcbFile) : "";
         
+        // உங்க சொந்த Render Node.js சர்வர் முகவரிக்கு டேட்டாவை அனுப்புகிறோம்
         try {
-            const sql = `INSERT INTO amc_complaints (id, user_name, section_name, designation, component, material_photo, elcb, elcb_photo, earth, description, date, rawMonth, rawYear, status, action_taken) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-            const params = [
-                ticketId,
-                document.getElementById('userName').value,
-                document.getElementById('sectionName').value,
-                document.getElementById('designation').value,
-                document.getElementById('component').value,
-                materialPhotoBase64,
-                document.getElementById('elcbStatus').value,
-                elcbPhotoBase64,
-                document.getElementById('earthCondition').value,
-                document.getElementById('description').value,
-                formattedDate, month, String(year), "Pending", ""
-            ];
+            const response = await fetch('/api/complaints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: ticketId,
+                    user_name: document.getElementById('userName').value,
+                    section_name: document.getElementById('sectionName').value,
+                    designation: document.getElementById('designation').value,
+                    component: document.getElementById('component').value,
+                    material_photo: materialPhotoBase64,
+                    elcb: document.getElementById('elcbStatus').value,
+                    elcb_photo: elcbPhotoBase64,
+                    earth: document.getElementById('earthCondition').value,
+                    description: document.getElementById('description').value,
+                    date: formattedDate,
+                    rawMonth: month,
+                    rawYear: String(year),
+                    status: "Pending",
+                    action_taken: ""
+                })
+            });
 
-            await executeQuery(sql, params);
-            alert(`⚡ Ticket Created Successfully in Online DB!\nYour Reference Number: ${ticketId}`);
-            document.getElementById('trackId').value = ticketId;
-            document.getElementById('grievanceForm').reset();
-            document.getElementById('photoUploadDiv').style.display = 'none';
+            if(response.ok) {
+                alert(`⚡ Ticket Created Successfully!\nYour Reference Number: ${ticketId}`);
+                document.getElementById('trackId').value = ticketId;
+                document.getElementById('grievanceForm').reset();
+                document.getElementById('photoUploadDiv').style.display = 'none';
+            } else {
+                alert("⚠️ சர்வரில் பிழை ஏற்பட்டுள்ளது!");
+            }
         } catch (error) {
             alert("⚠️ சமர்ப்பிப்பதில் சிக்கல் அண்ணே!");
             console.error(error);
@@ -177,6 +173,7 @@
         }
     });
 
+    // புகாரின் நிலையை செக் செய்யும் ஃபங்க்ஷன்
     async function checkStatus() {
         let inputId = document.getElementById('trackId').value.trim().toUpperCase();
         let resultBox = document.getElementById('statusResult');
@@ -186,9 +183,13 @@
         resultBox.innerHTML = "⏳ Fetching Live Status from Cloud...";
 
         try {
-            const res = await executeQuery("SELECT * FROM amc_complaints WHERE id = ?", [inputId]);
-            if (res && res.length > 0) {
-                let ticket = res[0];
+            const response = await fetch('/api/complaints');
+            const res = await response.json();
+            
+            // வந்திருக்கும் லிஸ்டில் குறிப்பிட்ட ID உள்ளதா என தேடுகிறது
+            let ticket = res.find(t => t.id === inputId);
+
+            if (ticket) {
                 let clientActionText = ticket.action_taken ? 
                     `<p style="margin: 8px 0; color:#16a34a;"><strong>👨‍💻 IT Team Action Taken:</strong> ${ticket.action_taken}</p>` : 
                     `<p style="margin: 8px 0; color:#6b7280; font-style:italic;"><strong>👨‍💻 IT Team Action Taken:</strong> Waiting for IT technician update...</p>`;
