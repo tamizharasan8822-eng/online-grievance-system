@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background-color: #f3f4f6; color: #333333; padding: 20px; }
-        .container { max-width: 1400px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .container { max-width: 1500px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         h2 { color: #1e3a8a; text-align: center; margin-bottom: 25px; border-bottom: 2px solid #1d4ed8; padding-bottom: 10px; }
         .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #e2e8f0; }
         .filter-section { display: flex; gap: 10px; align-items: center; }
@@ -31,6 +31,7 @@
         .modal-content { max-width: 80%; max-height: 80%; background: white; padding: 15px; border-radius: 8px; position: relative; text-align: center; }
         .close-btn { position: absolute; top: -12px; right: -12px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-weight: bold; font-size: 16px; }
         .desc-text { display: block; margin-top: 5px; color: #4b5563; font-size: 11px; font-style: italic; background-color: #f8fafc; padding: 4px; border-radius: 3px; border-left: 2px solid #cbd5e1; }
+        .time-badge { font-size: 11px; color: #6b7280; display: block; margin-top: 4px; font-weight: normal; }
     </style>
 </head>
 <body>
@@ -64,9 +65,9 @@
         <table id="reportTable">
             <thead>
                 <tr>
-                    <th>தேதி & நேரம்</th> <th>புகார் ID</th> <th>பணியாளர் விபரம்</th> <th>பிரிவு</th>
+                    <th>புகார் தேதி & நேரம்</th> <th>புகார் ID</th> <th>பணியாளர் விபரம்</th> <th>பிரிவு</th>
                     <th>பிரச்சனை & விபரம்</th> <th>பொருள் போட்டோ</th> <th>ELCB / எர்த்</th>
-                    <th>நிலை (Status)</th> <th>தீர்வு விபரம் (Action Taken)</th>
+                    <th>நிலை & மாற்றப்பட்ட நேரம் (Status)</th> <th>தீர்வு விபரம் (Action Taken)</th>
                 </tr>
             </thead>
             <tbody id="adminTableBody"></tbody>
@@ -82,9 +83,8 @@
     let allTickets = [];
     window.onload = loadAdminDashboard;
 
-    // சர்வரிடமிருந்து லைவ் டேட்டாவை எடுக்கும் ஃபங்க்ஷன்
     async function loadAdminDashboard() {
-        document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;">⏳ Cloud டேطاءபேசில் இருந்து புதிய தரவுகள் லோடாகி கொண்டிருக்கிறது...</td></tr>';
+        document.getElementById('adminTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center;">⏳ Cloud டேட்டாபேசில் இருந்து தரவுகள் லோடாகி கொண்டிருக்கிறது...</td></tr>';
         try {
             const response = await fetch('/api/complaints');
             allTickets = await response.json();
@@ -110,9 +110,10 @@
                 let materialPhotoBtn = ticket.material_photo ? `<button class="btn-view" onclick="openModal('${ticket.material_photo}')">📸 View Material</button>` : 'No Photo';
                 let elcbPhotoBtn = ticket.elcb_photo ? `<br><button class="btn-view" style="margin-top:5px; background-color:#10b981;" onclick="openModal('${ticket.elcb_photo}')">📸 View ELCB</button>` : '';
                 let actionTakenText = ticket.action_taken ? `<span style="color: #16a34a; font-weight: 600;">${ticket.action_taken}</span>` : '<span style="color: #9ca3af; font-style: italic;">No Action Logged Yet</span>';
-                
-                // விபரம் (Grievance Description) இருந்தால் அதை கீழே காட்டுவதற்கான செட்டப்
                 let descriptionSection = ticket.description ? `<span class="desc-text"><strong>விபரம்:</strong> ${ticket.description}</span>` : '';
+                
+                // ஸ்டேட்டஸ் மாற்றப்பட்ட நேரத்தைக் காட்டும் பகுதியண்ணே
+                let updateTimeBadge = ticket.status_updated_at ? `<span class="time-badge">🕒 <b>மாற்றப்பட்ட நேரம்:</b><br>${ticket.status_updated_at}</span>` : '<span class="time-badge">🕒 இன்னும் மாற்றப்படவில்லை</span>';
 
                 tbody.innerHTML += `
                     <tr>
@@ -129,6 +130,7 @@
                                 <option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
                                 <option value="Resolved & Closed" ${ticket.status === 'Resolved & Closed' ? 'selected' : ''}>Resolved & Closed</option>
                             </select>
+                            ${updateTimeBadge}
                         </td>
                         <td>${actionTakenText}</td>
                     </tr>`;
@@ -162,6 +164,8 @@
 
     function openModal(base64Src) { document.getElementById('modalImg').src = base64Src; document.getElementById('photoModal').style.display = 'flex'; }
     function closeModal() { document.getElementById('photoModal').style.display = 'none'; }
+    
+    // எக்செல் மற்றும் பிடிஎஃப் டவுன்லோடில் இப்போ இந்த நேரமும் தானாக சேர்ந்து வரும் அண்ணே
     function downloadExcel() { let table = document.getElementById("reportTable"); let wb = XLSX.utils.table_to_book(table, {sheet: "AMC Complaints"}); XLSX.writeFile(wb, "AMC_Complaint_Report.xlsx"); }
     function downloadPDF() { let element = document.getElementById('pdfArea'); html2pdf().set({ margin: 10, filename: 'AMC_Complaint_Report.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' } }).from(element).save(); }
     
@@ -169,9 +173,7 @@
         if (confirm("ஆன்லைன் டேட்டாபேசில் உள்ள அத்தனை புகார்களையும் நிரந்தரமாக நீக்கலாமா அண்ணே?")) { 
             try { 
                 const response = await fetch('/api/complaints/clear-all', { method: 'DELETE' });
-                if(response.ok) {
-                    loadAdminDashboard(); 
-                }
+                if(response.ok) { loadAdminDashboard(); }
             } catch(e) { alert("நீக்குவதில் தோல்வி!"); } 
         } 
     }
