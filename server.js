@@ -39,25 +39,22 @@ app.get('/api/complaints', (req, res) => {
     });
 });
 
-// 🔄 புதிய மாற்றம்: டேட்டாபேஸ் எரர் வராமல் இருக்க மாற்று வழி!
 app.put('/api/complaints/:id', (req, res) => {
     const { status, action_taken } = req.body;
     
-    // இந்திய நேரத்தைக் கணக்கிடுதல்
     const options = { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
     const currentIndianTime = new Date().toLocaleString('en-IN', options).replace(/\//g, '-');
 
-    // தீர்வுக்கு கீழே நேரத்தையும் சேர்த்து ஒரே பாக்ஸில் சேமிக்கிறோம் அண்ணே!
+    // அண்ணே! இங்கு குறியீட்டைப் பயன்படுத்தி ஒரே பாக்ஸில் பிரித்து வைக்கிறோம்
     let finalActionText = action_taken;
     if (status === "Resolved & Closed" && action_taken) {
-        finalActionText = `${action_taken} \n(🕒 தீர்வு நேரம்: ${currentIndianTime})`;
+        finalActionText = `${action_taken} | Closing Time: ${currentIndianTime}`;
     } else if (status === "In Progress") {
-        finalActionText = `In Progress \n(🕒 மாற்றப்பட்ட நேரம்: ${currentIndianTime})`;
+        finalActionText = `In Progress | Closing Time: ${currentIndianTime}`;
     } else {
-        finalActionText = `Pending \n(🕒 மாற்றப்பட்ட நேரம்: ${currentIndianTime})`;
+        finalActionText = `Pending | Closing Time: ${currentIndianTime}`;
     }
 
-    // பழைய காலங்களிலேயே (Columns) சேமிப்பதால் எந்த எரரும் வராது!
     db.query(
         'UPDATE amc_complaints SET status = ?, action_taken = ? WHERE id = ?',
         [status, finalActionText, req.params.id],
