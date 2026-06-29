@@ -7,7 +7,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f3f4f6; color: #333; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .form-container { background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+        .form-container { background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 600px; margin: 20px auto; }
         h2 { text-align: center; color: #1e3a8a; margin-bottom: 20px; border-bottom: 2px solid #1d4ed8; padding-bottom: 10px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #4b5563; }
@@ -29,17 +29,17 @@
     <h2>🛠️ AMC Complaint Registration</h2>
     <form id="complaintForm">
         <div class="form-group">
-            <label for="userName">Employee Name (பணியாளர் பெயர்):</label>
+            <label for="userName">Employee Name (பணியாளர் பெயர்): *</label>
             <input type="text" id="userName" required placeholder="Enter your name">
         </div>
 
         <div class="form-group">
-            <label for="designation">Designation (பதவி):</label>
+            <label for="designation">Designation (பதவி): *</label>
             <input type="text" id="designation" required placeholder="e.g., Operator, Supervisor">
         </div>
 
         <div class="form-group">
-            <label for="sectionName">Section (பிரிவு):</label>
+            <label for="sectionName">Section (பிரிவு): *</label>
             <select id="sectionName" required>
                 <option value="">--Select Section--</option>
                 <option value="Spinning">Spinning</option>
@@ -51,7 +51,7 @@
         </div>
 
         <div class="form-group">
-            <label for="component">Component / Issue (பிரச்சனை உள்ள பொருள்):</label>
+            <label for="component">Component / Issue (பிரச்சனை உள்ள பொருள்): *</label>
             <select id="component" required>
                 <option value="">--Select Component--</option>
                 <option value="UPS / Inverter">UPS / Inverter</option>
@@ -65,4 +65,179 @@
         </div>
 
         <div class="form-group">
-            <label for="description">Grievance Description (புகாரின் விபரம்):</
+            <label for="description">Grievance Description (புகாரின் விபரம்):</label>
+            <textarea id="description" placeholder="Briefly describe the issue..."></textarea>
+        </div>
+
+        <!-- 📸 விடுபட்ட ஃபீல்டுகள் கீழே சேர்க்கப்பட்டுள்ளது அண்ணே -->
+        <div class="form-group">
+            <label>Material Photo (பொருள் புகைப்படம்):</label>
+            <div class="file-input-wrapper">
+                <input type="file" id="materialPhoto" accept="image/*" onchange="previewImage(this, 'materialPreview')">
+                <img id="materialPreview" class="preview-img" alt="Material Preview">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>ELCB Available & Working? (ELCB வேலை செய்கிறதா?):</label>
+            <div class="radio-group">
+                <label><input type="radio" name="elcb" value="Yes" checked> Yes</label>
+                <label><input type="radio" name="elcb" value="No"> No</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>ELCB Photo (Optional):</label>
+            <div class="file-input-wrapper">
+                <input type="file" id="elcbPhoto" accept="image/*" onchange="previewImage(this, 'elcbPreview')">
+                <img id="elcbPreview" class="preview-img" alt="ELCB Preview">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Proper Earth Connection? (சரியான எர்த் உள்ளதா?):</label>
+            <div class="radio-group">
+                <label><input type="radio" name="earth" value="Yes" checked> Yes</label>
+                <label><input type="radio" name="earth" value="No"> No</label>
+            </div>
+        </div>
+
+        <button type="submit" id="submitBtn">🚀 Submit Ticket to Cloud</button>
+    </form>
+
+    <!-- 🔍 டிராக் பாக்ஸ் செக்ஷன் -->
+    <div class="track-box">
+        <h3>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h3>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="searchId" placeholder="Enter Reference Number (e.g., REG571432)">
+            <button style="width: auto; padding: 0 20px;" onclick="trackTicketStatus()">Check Status</button>
+        </div>
+        <div id="trackResult"></div>
+    </div>
+</div>
+
+<script>
+    let materialBase64 = "";
+    let elcbBase64 = "";
+    let allComplaints = [];
+
+    // லைவ் டேட்டாவை லோடு செய்யும் ஃபங்க்ஷன்
+    window.onload = loadLiveData;
+    async function loadLiveData() {
+        try {
+            const response = await fetch('/api/complaints');
+            allComplaints = await response.json();
+        } catch (e) { console.log("Failed to load cloud data."); }
+    }
+
+    function previewImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                if(previewId === 'materialPreview') materialBase64 = e.target.result;
+                if(previewId === 'elcbPreview') elcbBase64 = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.getElementById('complaintForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = "⏳ Saving to Cloud Database...";
+
+        const ticketId = "REG" + Math.floor(100000 + Math.random() * 900000);
+        
+        const now = new Date();
+        const options = { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        const formattedDate = now.toLocaleString('en-IN', options).replace(/\//g, '-');
+        
+        const rawMonth = String(now.getMonth() + 1).padStart(2, '0');
+        const rawYear = String(now.getFullYear());
+
+        const payload = {
+            id: ticketId,
+            user_name: document.getElementById('userName').value,
+            designation: document.getElementById('designation').value,
+            section_name: document.getElementById('sectionName').value,
+            component: document.getElementById('component').value,
+            description: document.getElementById('description').value,
+            material_photo: materialBase64,
+            elcb: document.querySelector('input[name="elcb"]:checked').value,
+            elcb_photo: elcbBase64,
+            earth: document.querySelector('input[name="earth"]:checked').value,
+            status: "Pending",
+            action_taken: "",
+            date: formattedDate,
+            rawMonth: rawMonth,
+            rawYear: rawYear
+        };
+
+        try {
+            const response = await fetch('/api/complaints', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert(`🎉 Ticket registered successfully!\nYour Reference Number: ${ticketId}`);
+                location.reload();
+            } else {
+                alert("⚠️ Error saving to cloud database!");
+                btn.disabled = false;
+                btn.innerText = "🚀 Submit Ticket to Cloud";
+            }
+        } catch (err) {
+            alert("⚠️ Connection Failed!");
+            btn.disabled = false;
+            btn.innerText = "🚀 Submit Ticket to Cloud";
+        }
+    });
+
+    // 🔄 குறியீட்டைப் (|) பிரிச்சு ஆங்கிலத்துல 'Closing Time' காட்டும் லாஜிக் அண்ணே
+    function trackTicketStatus() {
+        const searchId = document.getElementById('searchId').value.trim();
+        const resultDiv = document.getElementById('trackResult');
+        
+        if(!searchId) { alert("Please enter Reference Number!"); return; }
+        
+        const ticket = allComplaints.find(c => c.id === searchId);
+        
+        if(ticket) {
+            let actionPart = 'No Action Logged Yet';
+            let timePart = '';
+            
+            if (ticket.action_taken) {
+                if (ticket.action_taken.includes('|')) {
+                    let parts = ticket.action_taken.split('|');
+                    actionPart = parts[0].trim();
+                    timePart = `<br><strong>Closing Time:</strong> <span style="color:#4b5563;">${parts[1].replace('Closing Time:', '').trim()}</span>`;
+                } else {
+                    actionPart = ticket.action_taken;
+                }
+            }
+
+            resultDiv.innerHTML = `
+                <div style="margin-top:15px; padding:15px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; text-align:left;">
+                    <p style="margin-bottom:5px;"><strong>Ticket ID:</strong> ${ticket.id}</p>
+                    <p style="margin-bottom:5px;"><strong>Date & Time:</strong> ${ticket.date}</p>
+                    <p style="margin-bottom:8px;"><strong>Status:</strong> <span style="padding:2px 6px; background:#b45309; color:white; font-weight:bold; border-radius:4px; font-size:12px;">${ticket.status}</span></p>
+                    <p style="margin-top:10px; border-top:1px dashed #cbd5e1; padding-top:10px; font-size:13px;">
+                        🤖 <span style="color:#16a34a; font-weight:bold;">IT Team Action Taken:</span> ${actionPart}
+                        ${timePart}
+                    </p>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `<p style="color:red; margin-top:15px; font-weight:bold;">⚠️ Ticket ID Not Found in Cloud DB!</p>`;
+        }
+    }
+</script>
+</body>
+</html>
