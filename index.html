@@ -34,7 +34,6 @@
             <input type="text" id="userName" required placeholder="Enter your name">
         </div>
 
-        <!-- 👔 Gangman என்று மாற்றப்பட்ட Designation பகுதி அண்ணே -->
         <div class="form-group">
             <label for="designation">Designation (பதவி): <span class="req-star">*</span></label>
             <select id="designation" required>
@@ -136,14 +135,14 @@
         const elcbStar = document.getElementById('elcbStar');
         if(val === "Yes") {
             elcbInput.required = true;
-            elcbStar.style.display = "inline";
+            elStar = "inline";
+            if (elcbStar) elcbStar.style.display = "inline";
         } else {
             elcbInput.required = false;
-            elcbStar.style.display = "none";
+            if (elcbStar) elcbStar.style.display = "none";
         }
     }
 
-    // இமேஜ் ப்ரிவியூ லாஜிக்
     function previewImage(input, previewId) {
         const preview = document.getElementById(previewId);
         const file = input.files[0];
@@ -159,7 +158,6 @@
         }
     }
 
-    // ஃபார்ம் சப்மிட் செய்யும் லாஜிக்
     document.getElementById('complaintForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const btn = document.getElementById('submitBtn');
@@ -215,7 +213,7 @@
         }
     });
 
-    // ட்ராக்கிங் செய்யும் லாஜிக்
+    // 🔄 டிராக் ரிசல்டில் Employee Name சேர்க்கும் லாஜிக் அண்ணே
     function trackTicketStatus() {
         const searchId = document.getElementById('searchId').value.trim();
         const resultDiv = document.getElementById('trackResult');
@@ -241,6 +239,7 @@
             resultDiv.innerHTML = `
                 <div style="margin-top:15px; padding:15px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; text-align:left;">
                     <p style="margin-bottom:5px;"><strong>Ticket ID:</strong> ${ticket.id}</p>
+                    <p style="margin-bottom:5px;"><strong>Employee Name (பெயர்):</strong> ${ticket.user_name || 'N/A'}</p>
                     <p style="margin-bottom:5px;"><strong>Date & Time:</strong> ${ticket.date}</p>
                     <p style="margin-bottom:8px;"><strong>Status:</strong> <span style="padding:2px 6px; background:#b45309; color:white; font-weight:bold; border-radius:4px; font-size:12px;">${ticket.status}</span></p>
                     <p style="margin-top:10px; border-top:1px dashed #cbd5e1; padding-top:10px; font-size:13px;">
