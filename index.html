@@ -52,15 +52,17 @@
             <input type="text" id="sectionName" required placeholder="Enter your Section name (e.g., Spinning, Office)">
         </div>
 
+        <!-- 🖥️ OS Problem மற்றும் தமிழ் விளக்கங்களுடன் கூடிய புதிய டிராப்-டவுன் அண்ணே -->
         <div class="form-group">
             <label for="component">Component / Issue (பிரச்சனை உள்ள பொருள்): <span class="req-star">*</span></label>
             <select id="component" required>
                 <option value="">--Select Computer / Network Issue--</option>
-                <option value="Motherboard Issue">Motherboard Issue</option>
-                <option value="Keyboard & Mouse Issue">Keyboard & Mouse Issue</option>
-                <option value="SMPS Issue">SMPS Issue</option>
-                <option value="Monitor Issue">Monitor Issue</option>
-                <option value="Network Issue">Network Issue</option>
+                <option value="Motherboard Issue">Motherboard Issue (மதர்போர்டு பிரச்சனை)</option>
+                <option value="Keyboard & Mouse Issue">Keyboard & Mouse Issue (கீபோர்டு & மவுஸ் பிரச்சனை)</option>
+                <option value="SMPS Issue">SMPS Issue (எஸ்.எம்.பி.எஸ் பழுது)</option>
+                <option value="Monitor Issue">Monitor Issue (மானிட்டர் பிரச்சனை)</option>
+                <option value="Network Issue">Network Issue (நெட்வொர்க் பிரச்சனை)</option>
+                <option value="OS Problem">OS Problem (ஓஎஸ் / சாஃப்ட்வேர் பிரச்சனை)</option>
             </select>
         </div>
 
@@ -135,7 +137,6 @@
         const elcbStar = document.getElementById('elcbStar');
         if(val === "Yes") {
             elcbInput.required = true;
-            elStar = "inline";
             if (elcbStar) elcbStar.style.display = "inline";
         } else {
             elcbInput.required = false;
@@ -213,7 +214,6 @@
         }
     });
 
-    // 🔄 டிராக் ரிசல்டில் Employee Name சேர்க்கும் லாஜிக் அண்ணே
     function trackTicketStatus() {
         const searchId = document.getElementById('searchId').value.trim();
         const resultDiv = document.getElementById('trackResult');
