@@ -21,6 +21,7 @@
         button:hover { background-color: #1d4ed8; }
         .track-box { margin-top: 25px; padding-top: 20px; border-top: 2px solid #e2e8f0; }
         .track-box h3 { color: #1e3a8a; margin-bottom: 10px; font-size: 16px; }
+        .req-star { color: red; }
     </style>
 </head>
 <body>
@@ -29,17 +30,26 @@
     <h2>🛠️ AMC Complaint Registration</h2>
     <form id="complaintForm">
         <div class="form-group">
-            <label for="userName">Employee Name (பணியாளர் பெயர்): *</label>
+            <label for="userName">Employee Name (பணியாளர் பெயர்): <span class="req-star">*</span></label>
             <input type="text" id="userName" required placeholder="Enter your name">
         </div>
 
+        <!-- 👔 Designation டிராப்-டவுனாக மாற்றப்பட்டுள்ளது அண்ணே -->
         <div class="form-group">
-            <label for="designation">Designation (பதவி): *</label>
-            <input type="text" id="designation" required placeholder="e.g., Operator, Supervisor">
+            <label for="designation">Designation (பதவி): <span class="req-star">*</span></label>
+            <select id="designation" required>
+                <option value="">--Select Designation--</option>
+                <option value="A.E">A.E</option>
+                <option value="J.E">J.E</option>
+                <option value="Foreman">Foreman</option>
+                <option value="R.S">R.S</option>
+                <option value="C.I">C.I</option>
+                <option value="Gunman">Gunman</option>
+            </select>
         </div>
 
         <div class="form-group">
-            <label for="sectionName">Section (பிரிவு): *</label>
+            <label for="sectionName">Section (பிரிவு): <span class="req-star">*</span></label>
             <select id="sectionName" required>
                 <option value="">--Select Section--</option>
                 <option value="Spinning">Spinning</option>
@@ -50,10 +60,16 @@
             </select>
         </div>
 
+        <!-- 🖥️ புதிய பிரச்சனைகள் சேர்க்கப்பட்ட Component டிராப்-டவுன் அண்ணே -->
         <div class="form-group">
-            <label for="component">Component / Issue (பிரச்சனை உள்ள பொருள்): *</label>
+            <label for="component">Component / Issue (பிரச்சனை உள்ள பொருள்): <span class="req-star">*</span></label>
             <select id="component" required>
                 <option value="">--Select Component--</option>
+                <option value="Motherboard Issue">Motherboard Issue</option>
+                <option value="Keyboard & Mouse Issue">Keyboard & Mouse Issue</option>
+                <option value="SMPS Issue">SMPS Issue</option>
+                <option value="Monitor Issue">Monitor Issue</option>
+                <option value="Network Issue">Network Issue</option>
                 <option value="UPS / Inverter">UPS / Inverter</option>
                 <option value="Battery">Battery</option>
                 <option value="Air Conditioner (AC)">Air Conditioner (AC)</option>
@@ -61,51 +77,52 @@
                 <option value="CCTV Camera">CCTV Camera</option>
                 <option value="Fire Extinguisher">Fire Extinguisher</option>
                 <option value="Other Machinery">Other Machinery</option>
+                <option value="Others">Others</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="description">Grievance Description (புகாரின் விபரம்):</label>
-            <textarea id="description" placeholder="Briefly describe the issue..."></textarea>
+            <label for="description">Grievance Description (புகாரின் விபரம்): <span class="req-star">*</span></label>
+            <textarea id="description" required placeholder="Briefly describe the issue..."></textarea>
         </div>
 
-        <!-- 📸 விடுபட்ட ஃபீல்டுகள் கீழே சேர்க்கப்பட்டுள்ளது அண்ணே -->
         <div class="form-group">
-            <label>Material Photo (பொருள் புகைப்படம்):</label>
+            <label>Material Photo (பொருள் புகைப்படம்): <span class="req-star">*</span></label>
             <div class="file-input-wrapper">
-                <input type="file" id="materialPhoto" accept="image/*" onchange="previewImage(this, 'materialPreview')">
+                <input type="file" id="materialPhoto" required accept="image/*" onchange="previewImage(this, 'materialPreview')">
                 <img id="materialPreview" class="preview-img" alt="Material Preview">
             </div>
         </div>
 
         <div class="form-group">
-            <label>ELCB Available & Working? (ELCB வேலை செய்கிறதா?):</label>
+            <label>ELCB Available & Working? (ELCB வேலை செய்கிறதா?): <span class="req-star">*</span></label>
             <div class="radio-group">
-                <label><input type="radio" name="elcb" value="Yes" checked> Yes</label>
-                <label><input type="radio" name="elcb" value="No"> No</label>
+                <label><input type="radio" name="elcb" value="Yes" checked onchange="toggleElcbPhotoRequirement(this.value)"> Yes</label>
+                <label><input type="radio" name="elcb" value="No" onchange="toggleElcbPhotoRequirement(this.value)"> No</label>
             </div>
         </div>
 
         <div class="form-group">
-            <label>ELCB Photo (Optional):</label>
+            <label id="elcbPhotoLabel">ELCB Photo: <span class="req-star" id="elcbStar">*</span></label>
             <div class="file-input-wrapper">
-                <input type="file" id="elcbPhoto" accept="image/*" onchange="previewImage(this, 'elcbPreview')">
+                <input type="file" id="elcbPhoto" required accept="image/*" onchange="previewImage(this, 'elcbPreview')">
                 <img id="elcbPreview" class="preview-img" alt="ELCB Preview">
             </div>
         </div>
 
         <div class="form-group">
-            <label>Proper Earth Connection? (சரியான எர்த் உள்ளதா?):</label>
-            <div class="radio-group">
-                <label><input type="radio" name="earth" value="Yes" checked> Yes</label>
-                <label><input type="radio" name="earth" value="No"> No</label>
-            </div>
+            <label for="earthCondition">Earth Condition (எர்த் நிலை): <span class="req-star">*</span></label>
+            <select id="earthCondition" required>
+                <option value="">-- Select Earth Condition --</option>
+                <option value="Good">Good (சரி)</option>
+                <option value="Bad">Bad (பழுது)</option>
+                <option value="No Earth">No Earth (இல்லை)</option>
+            </select>
         </div>
 
         <button type="submit" id="submitBtn">🚀 Submit Ticket to Cloud</button>
     </form>
 
-    <!-- 🔍 டிராக் பாக்ஸ் செக்ஷன் -->
     <div class="track-box">
         <h3>🔍 Track Ticket Status (புகாரின் நிலை அறிதல்)</h3>
         <div style="display: flex; gap: 10px;">
@@ -121,13 +138,25 @@
     let elcbBase64 = "";
     let allComplaints = [];
 
-    // லைவ் டேட்டாவை லோடு செய்யும் ஃபங்க்ஷன்
     window.onload = loadLiveData;
     async function loadLiveData() {
         try {
             const response = await fetch('/api/complaints');
             allComplaints = await response.json();
         } catch (e) { console.log("Failed to load cloud data."); }
+        toggleElcbPhotoRequirement("Yes");
+    }
+
+    function toggleElcbPhotoRequirement(val) {
+        const elcbInput = document.getElementById('elcbPhoto');
+        const elcbStar = document.getElementById('elcbStar');
+        if(val === "Yes") {
+            elcbInput.required = true;
+            elcbStar.style.display = "inline";
+        } else {
+            elcbInput.required = false;
+            elcbStar.style.display = "none";
+        }
     }
 
     function previewImage(input, previewId) {
@@ -169,8 +198,8 @@
             description: document.getElementById('description').value,
             material_photo: materialBase64,
             elcb: document.querySelector('input[name="elcb"]:checked').value,
-            elcb_photo: elcbBase64,
-            earth: document.querySelector('input[name="earth"]:checked').value,
+            elcb_photo: document.querySelector('input[name="elcb"]:checked').value === "Yes" ? elcbBase64 : "",
+            earth: document.getElementById('earthCondition').value,
             status: "Pending",
             action_taken: "",
             date: formattedDate,
@@ -200,7 +229,6 @@
         }
     });
 
-    // 🔄 குறியீட்டைப் (|) பிரிச்சு ஆங்கிலத்துல 'Closing Time' காட்டும் லாஜிக் அண்ணே
     function trackTicketStatus() {
         const searchId = document.getElementById('searchId').value.trim();
         const resultDiv = document.getElementById('trackResult');
