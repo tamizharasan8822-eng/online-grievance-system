@@ -34,7 +34,7 @@
             <input type="text" id="userName" required placeholder="Enter your name">
         </div>
 
-        <!-- 👔 Designation முழு விளக்கங்களுடன் மாற்றி அமைக்கப்பட்டுள்ளது அண்ணே -->
+        <!-- 👔 Gangman என்று மாற்றப்பட்ட Designation பகுதி அண்ணே -->
         <div class="form-group">
             <label for="designation">Designation (பதவி): <span class="req-star">*</span></label>
             <select id="designation" required>
@@ -44,17 +44,15 @@
                 <option value="Foreman">Foreman</option>
                 <option value="R.S">R.S</option>
                 <option value="C.I">C.I</option>
-                <option value="Gunman">Gunman</option>
+                <option value="Gangman">Gangman</option>
             </select>
         </div>
 
-        <!-- ✍️ Section இப்போது மேனுவலாக டைப் செய்யும் டெக்ஸ்ட் பாக்ஸ் அண்ணே -->
         <div class="form-group">
             <label for="sectionName">Section (பிரிவு): <span class="req-star">*</span></label>
             <input type="text" id="sectionName" required placeholder="Enter your Section name (e.g., Spinning, Office)">
         </div>
 
-        <!-- 🖥️ சிஸ்டம் & நெட்வொர்க் பிரச்சனைகள் மட்டுமே கொண்ட டிராப்-டவுன் அண்ணே -->
         <div class="form-group">
             <label for="component">Component / Issue (பிரச்சனை உள்ள பொருள்): <span class="req-star">*</span></label>
             <select id="component" required>
@@ -145,6 +143,7 @@
         }
     }
 
+    // இமேஜ் ப்ரிவியூ லாஜிக்
     function previewImage(input, previewId) {
         const preview = document.getElementById(previewId);
         const file = input.files[0];
@@ -160,6 +159,7 @@
         }
     }
 
+    // ஃபார்ம் சப்மிட் செய்யும் லாஜிக்
     document.getElementById('complaintForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const btn = document.getElementById('submitBtn');
@@ -215,6 +215,7 @@
         }
     });
 
+    // ட்ராக்கிங் செய்யும் லாஜிக்
     function trackTicketStatus() {
         const searchId = document.getElementById('searchId').value.trim();
         const resultDiv = document.getElementById('trackResult');
