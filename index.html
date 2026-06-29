@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC Complaint Management System</title>
+    <title>System & Network Complaint Management System</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f3f4f6; color: #333; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
@@ -27,20 +27,20 @@
 <body>
 
 <div class="form-container">
-    <h2>🛠️ AMC Complaint Registration</h2>
+    <h2>🛠️ System & Network Complaint Registration</h2>
     <form id="complaintForm">
         <div class="form-group">
             <label for="userName">Employee Name (பணியாளர் பெயர்): <span class="req-star">*</span></label>
             <input type="text" id="userName" required placeholder="Enter your name">
         </div>
 
-        <!-- 👔 Designation டிராப்-டவுனாக மாற்றப்பட்டுள்ளது அண்ணே -->
+        <!-- 👔 Designation முழு விளக்கங்களுடன் மாற்றி அமைக்கப்பட்டுள்ளது அண்ணே -->
         <div class="form-group">
             <label for="designation">Designation (பதவி): <span class="req-star">*</span></label>
             <select id="designation" required>
                 <option value="">--Select Designation--</option>
-                <option value="A.E">A.E</option>
-                <option value="J.E">J.E</option>
+                <option value="A.E (Assistant Engineer)">A.E (Assistant Engineer)</option>
+                <option value="J.E (Junior Engineer)">J.E (Junior Engineer)</option>
                 <option value="Foreman">Foreman</option>
                 <option value="R.S">R.S</option>
                 <option value="C.I">C.I</option>
@@ -48,36 +48,22 @@
             </select>
         </div>
 
+        <!-- ✍️ Section இப்போது மேனுவலாக டைப் செய்யும் டெக்ஸ்ட் பாக்ஸ் அண்ணே -->
         <div class="form-group">
             <label for="sectionName">Section (பிரிவு): <span class="req-star">*</span></label>
-            <select id="sectionName" required>
-                <option value="">--Select Section--</option>
-                <option value="Spinning">Spinning</option>
-                <option value="Weaving">Weaving</option>
-                <option value="Processing">Processing</option>
-                <option value="Maintenance">Maintenance</option>
-                <option value="Office">Office</option>
-            </select>
+            <input type="text" id="sectionName" required placeholder="Enter your Section name (e.g., Spinning, Office)">
         </div>
 
-        <!-- 🖥️ புதிய பிரச்சனைகள் சேர்க்கப்பட்ட Component டிராப்-டவுன் அண்ணே -->
+        <!-- 🖥️ சிஸ்டம் & நெட்வொர்க் பிரச்சனைகள் மட்டுமே கொண்ட டிராப்-டவுன் அண்ணே -->
         <div class="form-group">
             <label for="component">Component / Issue (பிரச்சனை உள்ள பொருள்): <span class="req-star">*</span></label>
             <select id="component" required>
-                <option value="">--Select Component--</option>
+                <option value="">--Select Computer / Network Issue--</option>
                 <option value="Motherboard Issue">Motherboard Issue</option>
                 <option value="Keyboard & Mouse Issue">Keyboard & Mouse Issue</option>
                 <option value="SMPS Issue">SMPS Issue</option>
                 <option value="Monitor Issue">Monitor Issue</option>
                 <option value="Network Issue">Network Issue</option>
-                <option value="UPS / Inverter">UPS / Inverter</option>
-                <option value="Battery">Battery</option>
-                <option value="Air Conditioner (AC)">Air Conditioner (AC)</option>
-                <option value="Water Purifier (RO)">Water Purifier (RO)</option>
-                <option value="CCTV Camera">CCTV Camera</option>
-                <option value="Fire Extinguisher">Fire Extinguisher</option>
-                <option value="Other Machinery">Other Machinery</option>
-                <option value="Others">Others</option>
             </select>
         </div>
 
